@@ -1,0 +1,16 @@
+# Set this to True for development and False for production.
+DEBUG = True
+
+# Set this to the uri for your database.
+# SQLALCHEMY_DATABASE_URI = ''
+
+# set this to the url for your memcache.
+# MEMCACHE_URL = ''
+
+# This is the secret key. It's important to set this to something
+# non-trivial and not shared. Set this in your settings_local.py
+# file. DON'T set it in settings.py and DON'T check in the changes to
+# your repository.
+SECRET_KEY = ''
+
+# TODO: Add settings that devs and admin will need to set here.

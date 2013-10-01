@@ -1,0 +1,14 @@
+/* TODO: Put ernest css stuff here. */
+
+.container {
+    /* FIXME - srsly. */
+    width: 1200px;
+}
+
+tr.bug-row-resolved td {
+    text-decoration: line-through;
+}
+
+tr.bug-row-verified td {
+    text-decoration: line-through;
+}

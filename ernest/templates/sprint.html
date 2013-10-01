@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<div id="content">
+  <h1>Sprint: {{ sprint }}</h1>
+  <p>
+    Most recent updated bug: {{ latest_change_time }}
+  </p>
+  <table class="table-striped table-condensed">
+    <tr>
+      <th>ID</th>
+      <th>summary</th>
+      <th>whiteboard</th>
+      <th>last updated</th>
+      <th>component</th>
+      <th>status</th>
+    </tr>
+    {% for bug in bugs %}
+      <tr class="bug-row bug-row-{{ bug.status.lower() }}">
+        <td><a href="https://bugzilla.mozilla.org/show_bug.cgi?id={{ bug.id }}">{{ bug.id }}</a></td>
+        <td>{{ bug.summary }}</td>
+        <td>{{ bug.whiteboard }}</td>
+        <td>{{ bug.last_change_time }}</td>
+        <td>{{ bug.component }}</td>
+        <td>{{ bug.status }}</td>
+      </tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock content %}
+{% block js %}
+  {{ super() }}
+  <script src="{{ url_for('static', filename='js/ernest-bugs.js') }}"></script>
+{% endblock js %}

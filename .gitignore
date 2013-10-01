@@ -1,0 +1,7 @@
+*.pyc
+*.db
+*.swp
+*~
+.env
+settings_local.py
+docs/_build/

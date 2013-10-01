@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>{% block title %}{% endblock title %}</title>
+  <link href="{{ url_for('favicon') }}" rel="shortcut icon">
+{% block css %}
+  <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet" media="screen">
+  <link href="{{ url_for('static', filename='css/ernest.css') }}" rel="stylesheet" media="screen">
+{% endblock css %}
+</head>
+<body>
+<div class="container">
+  <div class="navbar">
+    <div class="navbar-inner">
+      <a class="brand" href="#">Ernest</a>
+      <ul class="nav">
+        <li class="pull-left"><a href="{{ url_for('index') }}">Home</a></li>
+        <li class="pull-left"><a href="{{ url_for('sprint-list') }}">Sprints</a></li>
+      </ul>
+      <ul class="nav pull-right">
+        {% if request.cookies.get('token') %}
+          <li><p class="navbar-text">{{ request.cookies.username }}</p></li>
+          <li><a id="logout-link" href="#">Logout</a></li>
+        {% else %}
+          <li><a id="login-link" href="{{ url_for('index') }}">Login</a></li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+
+{% block content %}
+{% endblock content %}
+
+{% block js %}
+<script src="{{ url_for('static', filename='js/jquery-2.0.3.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/ernest.js') }}"></script>
+{% endblock js %}
+</body>
+</html>

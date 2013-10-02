@@ -16,6 +16,8 @@ from werkzeug.routing import BaseConverter
 
 DAY = 60 * 60 * 24
 MONTH = DAY * 30
+
+# FIXME - move these to config file
 LOGIN_URL = 'https://bugzilla.mozilla.org/index.cgi'
 BUGZILLA_API_URL = 'https://api-dev.bugzilla.mozilla.org/latest'
 
@@ -40,6 +42,7 @@ db = SQLAlchemy(app)
 
 
 app.memcache = MemcachedCache(
+    # FIXME - if app.config.get some non-string, this fails
     servers=app.config.get('MEMCACHE_URL').split(','),
     key_prefix=app.config.get('MEMCACHE_PREFIX', 'ernest:'))
 
@@ -71,6 +74,7 @@ class SprintListView(MethodView):
     def get(self):
         return render_template(
             'sprint_list.html',
+            # FIXME - hard-coded
             sprints=['2013.19', '2013.20']
         )
 
@@ -81,7 +85,7 @@ class SprintView(MethodView):
         changed_after = request.args.get('since')
 
         components = [
-            # FIXME - this hardcodes SUMO
+            # FIXME - hardcoded
             {'product': 'support.mozilla.org', 'component': '__ANY__'}
         ]
 
@@ -100,6 +104,7 @@ class SprintView(MethodView):
             changed_after=changed_after,
         )
 
+        # FIXME - this fails if there's no bug data
         latest_change_time = max(
             [bug.get('last_change_time', 0) for bug in bug_data['bugs']])
 
@@ -253,6 +258,9 @@ def _fetch_bugs(id=None, components=None, sprint=None, fields=None, token=None, 
     return json.loads(response_text)
 
 
+# FIXME - we don't use this so far. it allows you to do bugzilla api
+# calls from javascript, but it seems to use urlencoded data, so I
+# don't know what to do with this.
 @app.route('/api/<path:path>', methods=['GET', 'POST', 'PUT', 'DELETE'])
 def api_proxy(path):
     path = str(path)
@@ -277,6 +285,7 @@ def favicon():
         mimetype='image/vnd.microsoft.icon')
 
 
+# Handles all static files
 @app.route('/<regex("css|img|js|font"):start>/<path:path>')
 def static_stuff(start, path):
     return send_file('static/%s/%s' % (start, path))

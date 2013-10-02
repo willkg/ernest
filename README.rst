@@ -5,9 +5,19 @@ README
 Summary
 =======
 
-Ernest shows you sprint data from Bugzilla.
+I'm always frank and earnest with bugs. Uh, in GitHub I'm Frank, and
+Bugzilla I'm Ernest.
+
+Ernest is a Bugzilla dashboard.
 
 The code is distributed under MPL-v2. See LICENSE file for more details.
+
+
+**October 2nd, 2013 status**
+
+This is pretty hard-coded for SUMO as we fiddle with it and get it to
+our liking. Then maybe I'll work on generalizing it. If you're
+interested in working on it, that's totally cool---just let us know.
 
 
 Install and configure

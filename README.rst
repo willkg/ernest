@@ -5,9 +5,9 @@ README
 Summary
 =======
 
-This is a project we hacked together.
+Ernest shows you sprint data from Bugzilla.
 
-The code is distributed under XXX. See LICENSE file for more details.
+The code is distributed under MPL-v2. See LICENSE file for more details.
 
 
 Install and configure
@@ -15,20 +15,20 @@ Install and configure
 
 1. Create a virtual environment.
 
-2. Install the dependencies::
+2. ``pip install -r requirements.txt``
 
-       $ pip install -r requirements.txt
+3. ``cp ernest/setting_local.py-dist ernest/settings_local.py``
 
-3. Read through the settings in ``ernest/settings_local.py``
+4. Edit ``ernest/settings_local.py``
 
-   TODO: Document settings that need to be set here.
-
-4. Create the database::
+5. Create the database::
 
        $ python manage.py db_create
 
    This creates the database based on the settings in
    ``ernest/settings_local.py``.
+
+6. Install and run memcached.
 
 
 Run server
@@ -46,12 +46,14 @@ Run::
 
     $ nosetests
 
+Haha--there are no tests, yet.
+
 
 Locations of things
 ===================
 
 :Project settings: ``ernest/settings.py`` and ``ernest/settings_local.py-dist``
-:View code:        ``ernest/view.py``
+:View code:        ``ernest/main.py``
 :Database models:  ``ernest/models.py``
 :Templates:        ``ernest/templates/``
 :Static assets:    ``ernest/static/``

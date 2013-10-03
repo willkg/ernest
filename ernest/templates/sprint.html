@@ -9,19 +9,37 @@
     <tr>
       <th>ID</th>
       <th>summary</th>
-      <th>whiteboard</th>
       <th>last updated</th>
-      <th>component</th>
+      <th>depends on</th>
       <th>status</th>
+      <th>points</th>
     </tr>
     {% for bug in bugs %}
       <tr class="bug-row bug-row-{{ bug.status.lower() }}">
         <td><a href="https://bugzilla.mozilla.org/show_bug.cgi?id={{ bug.id }}">{{ bug.id }}</a></td>
-        <td>{{ bug.summary }}</td>
-        <td>{{ bug.whiteboard }}</td>
+        <td>
+          {% if bug.securitygroup %}
+            <span class="label label-important">SECURE</span>
+          {% endif %}
+          {% if bug.confidentialgroup %}
+            <span class="label label-important">CONFIDENTIAL</span>
+          {% endif %}
+          {% if bug.needinfo %}
+            <span class="label label-important" title="{{ bug.needinfo }}">NEEDINFO</span>
+          {% endif %}
+          {{ bug.summary }}
+          {% for flag in bug.whiteboardflags %}
+            <span class="label">{{ flag }}
+          {% endfor %}
+        </td>
         <td>{{ bug.last_change_time }}</td>
-        <td>{{ bug.component }}</td>
+        <td>
+          {% for blocker in bug.depends_on %}
+            <a href="http://bugzilla.mozilla.org/show_bug.cgi?id={{ blocker }}">{{ blocker }}</a>
+          {% endfor %}
+        </td>
         <td>{{ bug.status }}</td>
+        <td>{{ bug.points }}</td>
       </tr>
     {% endfor %}
   </table>

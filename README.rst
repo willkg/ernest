@@ -59,6 +59,15 @@ Run::
 Haha--there are no tests, yet.
 
 
+Helpful documentation
+=====================
+
+* Bugzilla API: https://wiki.mozilla.org/Bugzilla:REST_API
+* Flask: http://flask.pocoo.org/docs/
+* Bootstrap: http://getbootstrap.com/2.3.2/index.html
+* jQuery: http://api.jquery.com/
+
+
 Locations of things
 ===================
 

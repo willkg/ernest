@@ -2,10 +2,21 @@
 {% block content %}
 <div id="content">
   <h1>Sprint: {{ sprint }}</h1>
-  <p>
-    Most recent updated bug: {{ latest_change_time }}
-  </p>
-  <table class="table-striped table-condensed">
+  <dl class="dl-horizontal">
+    <dt>Last load time</dt>
+    <dd>{{ last_load|df('%m-%d-%Y %H:%M') }}</dd>
+
+    <dt>Most recent updated bug</dt>
+    <dd>{{ latest_change_time|df('%m-%d-%Y %H:%M') }}</dd>
+
+    <dt>Bugs with no points</dt>
+    <dd>{{ bugs_with_no_points }}</dd>
+
+    <dt>Completion</dt>
+    <dd>{{ closed_points }} out of {{ total_points }}</dd>
+  </dl>
+
+  <table id="bug-table" class="table-striped table-condensed">
     <tr>
       <th>ID</th>
       <th>summary</th>
@@ -25,14 +36,17 @@
             <span class="label label-important">CONFIDENTIAL</span>
           {% endif %}
           {% if bug.needinfo %}
-            <span class="label label-important" title="{{ bug.needinfo }}">NEEDINFO</span>
+            <span class="label label-warning" title="{{ bug.needinfo }}">NEEDINFO</span>
+          {% endif %}
+          {% if bug.depends_on %}
+            <span class="label label-important" title="{{ bug.depends_on }}">BLOCKED</span>
           {% endif %}
           {{ bug.summary }}
           {% for flag in bug.whiteboardflags %}
             <span class="label">{{ flag }}
           {% endfor %}
         </td>
-        <td>{{ bug.last_change_time }}</td>
+        <td>{{ bug.last_change_time|df('%m-%d-%Y %H:%M') }}</td>
         <td>
           {% for blocker in bug.depends_on %}
             <a href="http://bugzilla.mozilla.org/show_bug.cgi?id={{ blocker }}">{{ blocker }}</a>

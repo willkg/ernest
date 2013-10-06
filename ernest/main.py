@@ -1,4 +1,5 @@
 import collections
+import datetime
 import json
 import os
 import re
@@ -76,6 +77,13 @@ def cache_get(key, default=None):
     return value
 
 
+@app.template_filter('df')
+def dateformat_filter(d, fmt):
+    if isinstance(d, basestring):
+        d = datetime.datetime.strptime(d, "%Y-%m-%dT%H:%M:%SZ")
+    return d.strftime(fmt)
+
+
 class SprintListView(MethodView):
     def get(self):
         return render_template(
@@ -114,6 +122,10 @@ class SprintView(MethodView):
         )
 
         bugs = bug_data['bugs']
+        total_points = 0
+        closed_points = 0
+        bugs_with_no_points = 0
+
         for bug in bugs:
             bug['needinfo'] = []
             bug['confidentialgroup'] = False
@@ -139,6 +151,13 @@ class SprintView(MethodView):
                 except ValueError:
                     pass
 
+            if bug['points'] is None:
+                bugs_with_no_points += 1
+            else:
+                total_points += bug['points']
+                if bug['status'].lower() in ('resolved', 'verified'):
+                    closed_points += bug['points']
+
             # Pick out flags
             bug['whiteboardflags'] = WHITEBOARD_FLAGS_RE.findall(bug['whiteboard'])
 
@@ -151,7 +170,11 @@ class SprintView(MethodView):
             'sprint.html',
             sprint=sprint,
             latest_change_time=latest_change_time,
-            bugs=bugs
+            bugs=bugs,
+            total_points=total_points,
+            closed_points=closed_points,
+            bugs_with_no_points=bugs_with_no_points,
+            last_load=datetime.datetime.now(),
         )
 
 
@@ -254,7 +277,8 @@ class BugzillaError(Exception):
     pass
 
 
-def _fetch_bugs(id=None, components=None, sprint=None, fields=None, token=None, changed_after=None):
+def _fetch_bugs(id=None, components=None, sprint=None, fields=None, token=None,
+                changed_after=None):
     params = {}
 
     if fields:

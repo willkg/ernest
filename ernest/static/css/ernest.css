@@ -1,8 +1,18 @@
 /* TODO: Put ernest css stuff here. */
 
+#footer {
+    border-top: 2px solid #dddddd;
+    padding: 10px 5px 10px 5px;
+    margin: 20px 0px 20px 0px;
+}
+
 .container {
     /* FIXME - srsly. */
     width: 1200px;
+}
+
+#bug-table {
+    width: 100%;
 }
 
 tr.bug-row-resolved td {

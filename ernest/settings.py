@@ -7,17 +7,35 @@ from ernest.utils import truthiness
 # development and BAD BAD BAD for production.
 DEBUG = truthiness(os.environ.get('DEBUG', True))
 
+
+# ------------------------------------------------
+# Required things to set
+# ------------------------------------------------
+
+# Set the SECRET_KEY in your settings_local.py file.
+
+
+# ------------------------------------------------
+# Database
+# ------------------------------------------------
+
 # This is the url to the database.
 # For a sqlite file-based database, use sqlite:///path/to/db
 SQLALCHEMY_DATABASE_URI = os.environ.get(
     'SQLALCHEMY_DATABASE_URI', 'sqlite:///../ernest_app.db')
 
+
+# ------------------------------------------------
+# Ernest supports several different cache systems.
+# ------------------------------------------------
+
 # Memcache setup
-MEMCACHE_URL = os.environ.get('MEMCACHE_URL', '127.0.0.1:11211')
+# MEMCACHE_URL = os.environ.get('MEMCACHE_URL', '127.0.0.1:11211')
+# MEMCACHE_PREFIX = os.environment.get('MEMCACHE_PREFIX', 'ernest:')
 
-# Set the SECRET_KEY in your settings_local.py file.
+# NullCache
+# NULLCACHE = True
 
-# TODO: Add project settings here..
 
 # This imports settings_local.py thus everything in that file
 # overrides what's in this file.

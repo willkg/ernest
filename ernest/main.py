@@ -11,8 +11,9 @@ from flask import Flask, request, make_response, abort, jsonify, send_file, rend
 from flask.views import MethodView
 from flask.ext.sqlalchemy import SQLAlchemy
 
-from werkzeug.contrib.cache import MemcachedCache
 from werkzeug.routing import BaseConverter
+
+from .cache import build_cache
 
 
 DAY = 60 * 60 * 24
@@ -48,10 +49,7 @@ register_error_handlers(app)
 db = SQLAlchemy(app)
 
 
-app.memcache = MemcachedCache(
-    # FIXME - if app.config.get some non-string, this fails
-    servers=app.config.get('MEMCACHE_URL').split(','),
-    key_prefix=app.config.get('MEMCACHE_PREFIX', 'ernest:'))
+app.cache = build_cache(app.config)
 
 
 class RegexConverter(BaseConverter):
@@ -65,11 +63,11 @@ app.url_map.converters['regex'] = RegexConverter
 def cache_set(key, value, *args, **options):
     if isinstance(value, (dict, list, bool)):
         value = json.dumps(value)
-    app.memcache.set(key, value, *args, **options)
+    app.cache.set(key, value, *args, **options)
 
 
 def cache_get(key, default=None):
-    value = app.memcache.get(key)
+    value = app.cache.get(key)
     if value is None:
         value = default
     if value is not None and not isinstance(value, (dict, list, bool)):
@@ -186,7 +184,7 @@ class LogoutView(MethodView):
         response.set_cookie('username', '', expires=0)
         # delete from memcache too
         token_cache_key = 'token:%s' % cookie_token
-        app.memcache.delete(token_cache_key)
+        app.cache.delete(token_cache_key)
         return response
 
 

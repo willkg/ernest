@@ -29,7 +29,10 @@ Install and configure
 
 3. ``cp ernest/setting_local.py-dist ernest/settings_local.py``
 
-4. Edit ``ernest/settings_local.py``
+4. Edit ``ernest/settings_local.py``.
+
+   You can see which settings are editable/overrideable in
+   ``ernest/settings.py``.
 
 5. Create the database::
 
@@ -52,11 +55,14 @@ Run::
 Run tests
 =========
 
-Run::
+Ernest is in rapid prototype spike development and changes on the
+whims of New England weather.
+
+Ergo, there are no tests, yet.
+
+When there are tests, then you can run them with::
 
     $ nosetests
-
-Haha--there are no tests, yet.
 
 
 Helpful documentation
@@ -71,8 +77,17 @@ Helpful documentation
 Locations of things
 ===================
 
-:Project settings: ``ernest/settings.py`` and ``ernest/settings_local.py-dist``
-:View code:        ``ernest/main.py``
-:Database models:  ``ernest/models.py``
-:Templates:        ``ernest/templates/``
-:Static assets:    ``ernest/static/``
+Project settings:
+    ``ernest/settings.py`` and ``ernest/settings_local.py-dist``
+
+View code:
+    ``ernest/main.py``
+
+Database models:
+    ``ernest/models.py``
+
+Templates:
+    ``ernest/templates/``
+
+Static assets:
+    ``ernest/static/``

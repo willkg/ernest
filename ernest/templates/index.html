@@ -3,23 +3,15 @@
 <div id="home-screen">
   <div class="hero-unit">
     <h1>Ernest</h1>
-    {% if not request.cookies.get('token') %}
+    <p>
+      Ernest lets you look at sprints of bugs from Bugzilla. Log in to view
+      the bugs using your Bugzilla permissions.
+    </p>
+    {% if request.cookies.get('token') %}
       <p>
-        Log in with your Bugzilla credentials:
-      </p>
-      <label>
-        Login: <input type="text" id="login-field" name="login"/>
-      </label>
-      <label>
-        Password: <input type="password" id="password-field" name="password"/>
-      </label>
-      <button id="login-submit" class="btn btn-primary">Submit</button>
-    {% else %}
-      <p>
-        You are already logged in.
+        Welcome back!
       </p>
     {% endif %}
   </div>
 </div>
-
 {% endblock content %}

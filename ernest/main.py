@@ -87,18 +87,21 @@ class SprintListView(MethodView):
         return render_template(
             'sprint_list.html',
             # FIXME - hard-coded
-            sprints=['2013.19', '2013.20']
+            sprints=[
+                ('support.mozilla.org', '2013.19'),
+                ('support.mozilla.org', '2013.20'),
+            ]
         )
 
 
 class SprintView(MethodView):
-    def get(self, sprint=None):
+    def get(self, product, sprint):
         token = request.cookies.get('token')
         changed_after = request.args.get('since')
 
         components = [
             # FIXME - hardcoded
-            {'product': 'support.mozilla.org', 'component': '__ANY__'}
+            {'product': product, 'component': '__ANY__'}
         ]
 
         bug_data = fetch_bugs(
@@ -182,7 +185,7 @@ class LogoutView(MethodView):
         response = make_response('logout')
         response.set_cookie('token', '', expires=0)
         response.set_cookie('username', '', expires=0)
-        # delete from memcache too
+        # delete from cache too
         token_cache_key = 'token:%s' % cookie_token
         app.cache.delete(token_cache_key)
         return response
@@ -357,7 +360,8 @@ def index():
     return render_template('index.html')
 
 
-app.add_url_rule('/api/sprint/<sprint>', view_func=SprintView.as_view('sprint'))
+app.add_url_rule('/api/sprint/<product>/<sprint>',
+                 view_func=SprintView.as_view('sprint'))
 app.add_url_rule('/api/sprint/', view_func=SprintListView.as_view('sprint-list'))
 app.add_url_rule('/api/logout', view_func=LogoutView.as_view('logout'))
 app.add_url_rule('/api/login', view_func=LoginView.as_view('login'))

@@ -1,5 +1,7 @@
 (function() {
     function init() {
+        $('.login-form').hide();
+
         $('#login-submit').on('click', function() {
             var jqxhr;
 
@@ -19,6 +21,11 @@
                 type: 'POST',
                 url: '/api/login'
             });
+        });
+
+        $('#login-link').on('click', function() {
+            $('#login-link').hide();
+            $('.login-form').show();
         });
 
         $('#logout-link').on('click', function() {

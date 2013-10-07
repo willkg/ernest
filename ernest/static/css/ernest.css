@@ -1,5 +1,9 @@
 /* TODO: Put ernest css stuff here. */
 
+#login-field, #password-field {
+    width: 10em;
+}
+
 #footer {
     border-top: 2px solid #dddddd;
     padding: 10px 5px 10px 5px;

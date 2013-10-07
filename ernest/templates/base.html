@@ -12,9 +12,8 @@
 <div class="container">
   <div class="navbar">
     <div class="navbar-inner">
-      <a class="brand" href="#">Ernest</a>
+      <a class="brand" href="{{ url_for('index') }}">Ernest</a>
       <ul class="nav">
-        <li class="pull-left"><a href="{{ url_for('index') }}">Home</a></li>
         <li class="pull-left"><a href="{{ url_for('sprint-list') }}">Sprints</a></li>
       </ul>
       <ul class="nav pull-right">
@@ -22,7 +21,14 @@
           <li><p class="navbar-text">{{ request.cookies.username }}</p></li>
           <li><a id="logout-link" href="#">Logout</a></li>
         {% else %}
-          <li><a id="login-link" href="{{ url_for('index') }}">Login</a></li>
+          <li>
+            <input class="login-form" type="text" id="login-field"
+                   placeholder="Bugzilla login" name="login"/>
+            <input class="login-form" type="password" id="password-field"
+                   placeholder="Bugzilla password" name="password"/>
+            <button id="login-submit" class="btn btn-primary login-form">Submit</button>
+            <a id="login-link" href="#">Login</a>
+          </li>
         {% endif %}
       </ul>
     </div>

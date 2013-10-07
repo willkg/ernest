@@ -3,8 +3,8 @@
 <div id="content">
   <h1>Sprint list</h1>
   <ul>
-    {% for sprint in sprints %}
-      <li><a href="{{ url_for('sprint', sprint=sprint) }}">{{ sprint }}</a></li>
+    {% for product, sprint in sprints %}
+      <li><a href="{{ url_for('sprint', product=product, sprint=sprint) }}">{{ sprint }}</a></li>
     {% endfor %}
   </ul>
 </div>

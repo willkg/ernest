@@ -37,6 +37,7 @@ app = Flask(__name__)
 settings_key = 'ERNEST_SETTINGS'.upper()
 if os.environ.get(settings_key):
     app.config.from_envvar(settings_key, silent=True)
+
 else:
     from ernest import settings
     app.config.from_object(settings)
@@ -80,6 +81,13 @@ def dateformat_filter(d, fmt):
     if isinstance(d, basestring):
         d = datetime.datetime.strptime(d, "%Y-%m-%dT%H:%M:%SZ")
     return d.strftime(fmt)
+
+
+class QueueListView(MethodView):
+    def get(self):
+        return render_template(
+            'queue.html'
+        )
 
 
 class SprintListView(MethodView):

@@ -1,17 +1,17 @@
 {% extends "base.html" %}
 {% block content %}
-<div id="home-screen">
-  <div class="hero-unit">
-    <h1>Ernest</h1>
-    <p>
-      Ernest lets you look at sprints of bugs from Bugzilla. Log in to view
-      the bugs using your Bugzilla permissions.
-    </p>
-    {% if request.cookies.get('token') %}
+  <div id="home-screen">
+    <div class="hero-unit">
+      <h1>Ernest</h1>
       <p>
-        Welcome back!
+        Ernest lets you look at sprints of bugs from Bugzilla. Log in to view
+        the bugs using your Bugzilla permissions.
       </p>
-    {% endif %}
+      {% if request.cookies.get('token') %}
+        <p>
+          Welcome back!
+        </p>
+      {% endif %}
+    </div>
   </div>
-</div>
 {% endblock content %}

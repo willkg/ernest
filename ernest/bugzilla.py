@@ -1,7 +1,16 @@
 import collections
 import json
+import re
 
 import requests
+
+
+WHITEBOARD_SPRINT_RE = re.compile(
+    r'u=(?P<user>[^\s]+) '
+    r'c=(?P<component>[^\s]+) '
+    r'p=(?P<points>[^\s]+) '
+    r's=(?P<sprint>[^\s]+)')
+WHITEBOARD_FLAGS_RE = re.compile(r'\[(?P<flag>[^\]]+)\]')
 
 
 class BugzillaError(Exception):
@@ -12,6 +21,26 @@ class BugzillaTracker(object):
     def __init__(self, app):
         self.app = app
         self.bzurl = app.config['BUGZILLA_API_URL']
+
+    def parse_whiteboard(self, whiteboard):
+        if not whiteboard:
+            return {}
+
+        wb_data = {}
+
+        wb_sprint_match = WHITEBOARD_SPRINT_RE.search(whiteboard)
+        if wb_sprint_match:
+            wb_data['u'] = wb_sprint_match.group('user')
+            wb_data['c'] = wb_sprint_match.group('component')
+            try:
+                wb_data['p'] = int(wb_sprint_match.group('points'))
+            except ValueError:
+                pass
+            wb_data['s'] = wb_sprint_match.group('sprint')
+
+        wb_data['flags'] = WHITEBOARD_FLAGS_RE.findall(whiteboard)
+
+        return wb_data
 
     def augment_with_auth(self, request_arguments, token):
         user_cache_key = 'auth:%s' % token

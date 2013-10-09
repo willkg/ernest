@@ -1,7 +1,6 @@
 import datetime
 import json
 import os
-import re
 import uuid
 
 import requests
@@ -22,13 +21,6 @@ MONTH = DAY * 30
 
 # FIXME - move this to config file
 LOGIN_URL = 'https://bugzilla.mozilla.org/index.cgi'
-
-WHITEBOARD_SPRINT_RE = re.compile(
-    r'u=(?P<user>[^\s]+) '
-    r'c=(?P<component>[^\s]+) '
-    r'p=(?P<points>[^\s]+) '
-    r's=(?P<sprint>[^\s]+)')
-WHITEBOARD_FLAGS_RE = re.compile(r'\[(?P<flag>[^\]]+)\]')
 
 # Create the app
 app = Flask(__name__)
@@ -118,7 +110,8 @@ class SprintView(MethodView):
             {'product': product, 'component': '__ANY__'}
         ]
 
-        bug_data = BugzillaTracker(app).fetch_bugs(
+        bz = BugzillaTracker(app)
+        bug_data = bz.fetch_bugs(
             components,
             fields=(
                 'id',
@@ -145,7 +138,6 @@ class SprintView(MethodView):
             bug['needinfo'] = []
             bug['confidentialgroup'] = False
             bug['securitygroup'] = False
-            bug['points'] = None
 
             for flag in bug.get('flags', []):
                 if flag['name'] == 'needinfo':
@@ -158,13 +150,9 @@ class SprintView(MethodView):
                 elif group['name'] == 'websites-security':
                     bug['securitygroup'] = True
 
-            # Pick out points
-            wb_sprint_match = WHITEBOARD_SPRINT_RE.match(bug['whiteboard'])
-            if wb_sprint_match:
-                try:
-                    bug['points'] = int(wb_sprint_match.group('points'))
-                except ValueError:
-                    pass
+            # Pick out whiteboard data
+            wb_data = bz.parse_whiteboard(bug['whiteboard'])
+            bug['points'] = wb_data.get('points', None)
 
             if bug['points'] is None:
                 bugs_with_no_points += 1
@@ -173,9 +161,7 @@ class SprintView(MethodView):
                 if bug['status'].lower() in ('resolved', 'verified'):
                     closed_points += bug['points']
 
-            # Pick out flags
-            bug['whiteboardflags'] = WHITEBOARD_FLAGS_RE.findall(bug['whiteboard'])
-
+            bug['whiteboardflags'] = wb_data['flags']
 
         # FIXME - this fails if there's no bug data
         latest_change_time = max(

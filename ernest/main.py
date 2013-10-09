@@ -152,7 +152,7 @@ class SprintView(MethodView):
 
             # Pick out whiteboard data
             wb_data = bz.parse_whiteboard(bug['whiteboard'])
-            bug['points'] = wb_data.get('points', None)
+            bug['points'] = wb_data.get('p', None)
 
             if bug['points'] is None:
                 bugs_with_no_points += 1

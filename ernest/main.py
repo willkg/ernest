@@ -14,6 +14,7 @@ from werkzeug.routing import BaseConverter
 
 from .bugzilla import BugzillaTracker
 from .cache import build_cache
+from .version import VERSION, VERSION_RAW
 
 
 DAY = 60 * 60 * 24
@@ -81,6 +82,13 @@ def dateformat_filter(d, fmt):
         d = datetime.datetime.strptime(d, "%Y-%m-%dT%H:%M:%SZ")
     return d.strftime(fmt)
 
+
+@app.context_processor
+def basecontext():
+    return {
+        'VERSION': VERSION,
+        'VERSION_RAW': VERSION_RAW,
+    }
 
 class QueueListView(MethodView):
     def get(self):

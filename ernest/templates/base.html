@@ -41,7 +41,11 @@
 
       {% block footer %}
         <div id="footer">
-          <p>This is <a href="https://github.com/willkg/ernest">ernest</a>.
+          This is <a href="https://github.com/willkg/ernest">ernest</a>.
+          Version {{ VERSION }}
+          {% if VERSION != VERSION_RAW %}
+            ({{ VERSION_RAW }})
+          {% endif %}
         </div>
       {% endblock footer %}
     </div>

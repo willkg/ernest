@@ -1,7 +1,5 @@
 (function() {
     function init() {
-        $('.login-form').hide();
-
         $('#login-submit').on('click', function() {
             var jqxhr;
 
@@ -25,7 +23,7 @@
 
         $('#login-link').on('click', function() {
             $('#login-link').hide();
-            $('.login-form').show();
+            $('#login-form').show();
         });
 
         $('#logout-link').on('click', function() {

@@ -1,20 +1,41 @@
 {% extends "base.html" %}
 {% block content %}
   <div id="content">
-    <h1>Sprint: {{ sprint }}</h1>
-    <dl class="dl-horizontal">
-      <dt>Last load time</dt>
-      <dd>{{ last_load|df('%m-%d-%Y %H:%M') }}</dd>
+    <h1>Sprint: {{ sprint }}
+      {% if not bugs_with_no_points %}
+        {% if closed_points == total_points %}
+          <span class="label label-success">SUCCESS! ☺</span>
+        {% elif closed_points > (total_points / 2.0) %}
+          <span class="label label-info">Almost there... Work faster! ⛏</span>
+        {% endif %}
+      {% endif %}
+    </h1>
 
-      <dt>Most recent updated bug</dt>
-      <dd>{{ latest_change_time|df('%m-%d-%Y %H:%M') }}</dd>
+    <div class="row">
+      <div class="span6">
+        <dl class="dl-horizontal">
+          <dt>Last refresh</dt>
+          <dd>{{ last_load|df('%m-%d-%Y %H:%M') }}</dd>
 
-      <dt>Bugs with no points</dt>
-      <dd>{{ bugs_with_no_points }}</dd>
+          <dt>Most recent last updated</dt>
+          <dd>{{ latest_change_time|df('%m-%d-%Y %H:%M') }}</dd>
 
-      <dt>Completion</dt>
-      <dd>{{ closed_points }} out of {{ total_points }}</dd>
-    </dl>
+        </dl>
+      </div>
+      <div class="span6">
+        <dl class="dl-horizontal">
+          {% if bugs_with_no_points %}
+            <dt class="text-error">Bugs with no points</dt>
+            <dd class="text-error">{{ bugs_with_no_points }}</dd>
+          {% endif %}
+          <dt>Total points</dt>
+          <dd>{{ total_points }}</dd>
+
+          <dt>Points completed</dt>
+          <dd>{{ closed_points }} / {{ total_points }}</dd>
+        </dl>
+      </div>
+    </div>
 
     <table id="bug-table" class="table-striped table-condensed">
       <tr>

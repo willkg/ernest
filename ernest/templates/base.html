@@ -22,11 +22,13 @@
               <li><a id="logout-link" href="#">Logout</a></li>
             {% else %}
               <li>
-                <input class="login-form initially-hidden" type="text" id="login-field"
-                       placeholder="Bugzilla login" name="login"/>
-                <input class="login-form initially-hidden" type="password" id="password-field"
-                       placeholder="Bugzilla password" name="password"/>
-                <button id="login-submit initially-hidden" class="btn btn-primary login-form">Submit</button>
+                <div id="login-form">
+                  <input class="login-form" type="text" id="login-field"
+                         placeholder="Bugzilla login" name="login"/>
+                  <input class="login-form" type="password" id="password-field"
+                         placeholder="Bugzilla password" name="password"/>
+                  <button id="login-submit" class="btn btn-primary login-form">Submit</button>
+                </div>
                 <a id="login-link" href="#">Login</a>
               </li>
             {% endif %}

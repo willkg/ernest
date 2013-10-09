@@ -1,4 +1,3 @@
-import collections
 import datetime
 import json
 import os
@@ -13,15 +12,15 @@ from flask.ext.sqlalchemy import SQLAlchemy
 
 from werkzeug.routing import BaseConverter
 
+from .bugzilla import BugzillaTracker
 from .cache import build_cache
 
 
 DAY = 60 * 60 * 24
 MONTH = DAY * 30
 
-# FIXME - move these to config file
+# FIXME - move this to config file
 LOGIN_URL = 'https://bugzilla.mozilla.org/index.cgi'
-BUGZILLA_API_URL = 'https://api-dev.bugzilla.mozilla.org/latest'
 
 WHITEBOARD_SPRINT_RE = re.compile(
     r'u=(?P<user>[^\s]+) '
@@ -108,11 +107,10 @@ class SprintView(MethodView):
         changed_after = request.args.get('since')
 
         components = [
-            # FIXME - hardcoded
             {'product': product, 'component': '__ANY__'}
         ]
 
-        bug_data = fetch_bugs(
+        bug_data = BugzillaTracker(app).fetch_bugs(
             components,
             fields=(
                 'id',
@@ -235,118 +233,12 @@ class LoginView(MethodView):
             return response
 
 
-def augment_with_auth(request_arguments, token):
-    user_cache_key = 'auth:%s' % token
-    user_info = cache_get(user_cache_key)
-    if user_info:
-        request_arguments['userid'] = user_info['Bugzilla_login']
-        request_arguments['cookie'] = user_info['Bugzilla_logincookie']
-
-
-def fetch_bugs(components, fields, sprint=None, token=None, bucket_requests=3,
-               changed_after=None):
-
-    combined = collections.defaultdict(list)
-    for i in range(0, len(components), bucket_requests):
-        some_components = components[i:i + bucket_requests]
-        bug_data = _fetch_bugs(
-            components=some_components,
-            sprint=sprint,
-            fields=fields,
-            token=token,
-            changed_after=changed_after,
-        )
-        for key in bug_data:
-            if key == 'bugs' and changed_after:
-                # For some ungodly reason, even if you pass `changed_after`
-                # into the bugzilla API you sometimes get bugs that were last
-                # updated BEFORE the `changed_after` parameter specifies.
-                # We suspect this is due to certain changes not incrementing
-                # the `last_change_time` on the bug. E.g. whiteboard changes.
-                # Also, the `changed_after` parameter does a:
-                # `last_change_time >= :changed_after` operation but we only
-                # want those that are greater than `:changed_after`.
-                bugs = [
-                    bug for bug in bug_data[key]
-                    if bug['last_change_time'] > changed_after
-                ]
-                combined[key].extend(bugs)
-            else:
-                combined[key].extend(bug_data[key])
-
-    return combined
-
-
-def fetch_bug(id, token=None, refresh=False, fields=None):
-    # @refresh is currently not implemented
-    return _fetch_bugs(id=id, token=token, fields=fields)
-
-
-class BugzillaError(Exception):
-    pass
-
-
-def _fetch_bugs(id=None, components=None, sprint=None, fields=None, token=None,
-                changed_after=None):
-    params = {}
-
-    if fields:
-        params['include_fields'] = ','.join(fields)
-
-    if components:
-        for each in components:
-            p = params.get('product', [])
-            p.append(each['product'])
-            params['product'] = p
-            # c = params.get('component', [])
-            # c.append(each['component'])
-            # params['component'] = c
-
-    if sprint:
-        params['whiteboard'] = 's=' + sprint
-        params['whiteboard_type'] = 'contains'
-
-    if token:
-        augment_with_auth(params, token)
-
-    if changed_after:
-        params['changed_after'] = changed_after
-
-    url = BUGZILLA_API_URL
-    url += '/bug'
-
-    if id:
-        url += '/%s' % id
-
-    r = requests.request(
-        'GET',
-        url,
-        params=params,
-    )
-    if r.status_code != 200:
-        raise BugzillaError(r.text)
-
-    response_text = r.text
-    return json.loads(response_text)
-
-
 # FIXME - we don't use this so far. it allows you to do bugzilla api
 # calls from javascript, but it seems to use urlencoded data, so I
 # don't know what to do with this.
 @app.route('/api/<path:path>', methods=['GET', 'POST', 'PUT', 'DELETE'])
 def api_proxy(path):
-    path = str(path)
-    request_arguments = dict(request.args)
-    # str() because it's a Cookie Morsel
-    token = str(request.cookies.get('token'))
-    augment_with_auth(request_arguments, token)
-    r = requests.request(
-        request.method,
-        BUGZILLA_API_URL + '/{0}'.format(path),
-        params=request_arguments,
-        data=request.form
-    )
-    return r.text
+    return BugzillaTracker(app).bugzilla_api(path, request)
 
 
 # Special rule for old browsers to correctly handle favicon.

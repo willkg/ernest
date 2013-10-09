@@ -1,5 +1,9 @@
 /* TODO: Put ernest css stuff here. */
 
+.initially-hidden {
+    display: none;
+}
+
 #login-field, #password-field {
     width: 10em;
 }

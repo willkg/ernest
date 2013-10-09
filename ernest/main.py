@@ -16,13 +16,21 @@ from .cache import build_cache
 from .version import VERSION, VERSION_RAW
 
 
+# ----------------------------------------
+# "Constants"
+# ----------------------------------------
+
 DAY = 60 * 60 * 24
 MONTH = DAY * 30
 
 # FIXME - move this to config file
 LOGIN_URL = 'https://bugzilla.mozilla.org/index.cgi'
 
-# Create the app
+
+# ----------------------------------------
+# Flask app setup and configuration
+# ----------------------------------------
+
 app = Flask(__name__)
 
 # Handle settings--look at os.environ first
@@ -42,15 +50,46 @@ register_error_handlers(app)
 db = SQLAlchemy(app)
 
 
+# ----------------------------------------
+# Models
+# ----------------------------------------
+
+class Project(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(20), unique=True)
+
+    def __init__(self, name):
+        self.name = name
+
+    def __repr__(self):
+        return '<Project {0}>'.format(self.name)
+
+
+class Sprint(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(20))
+    start_date = db.Column(db.DateTime)
+    end_date = db.Column(db.DateTime)
+    notes = db.Column(db.Text)
+    postmortem = db.Column(db.Text)
+
+    project_id = db.Column(db.Integer, db.ForeignKey('project.id'))
+    project = db.relationship('Project',
+        backref=db.backref('sprints', lazy='dynamic'))
+
+    def __init__(self, project_id, name):
+        self.project_id = project_id
+        self.name = name
+
+    def __repr__(self):
+        return '<Sprint {0}:{1}>'.format(self.project, self.name)
+
+
+# ----------------------------------------
+# Cache stuff
+# ----------------------------------------
+
 app.cache = build_cache(app.config)
-
-
-class RegexConverter(BaseConverter):
-    def __init__(self, url_map, *items):
-        super(RegexConverter, self).__init__(url_map)
-        self.regex = items[0]
-
-app.url_map.converters['regex'] = RegexConverter
 
 
 def cache_set(key, value, *args, **options):
@@ -68,6 +107,10 @@ def cache_get(key, default=None):
     return value
 
 
+# ----------------------------------------
+# Template stuff
+# ----------------------------------------
+
 @app.template_filter('df')
 def dateformat_filter(d, fmt):
     if isinstance(d, basestring):
@@ -81,6 +124,19 @@ def basecontext():
         'VERSION': VERSION,
         'VERSION_RAW': VERSION_RAW,
     }
+
+
+# ----------------------------------------
+# Views and routes
+# ----------------------------------------
+
+class RegexConverter(BaseConverter):
+    def __init__(self, url_map, *items):
+        super(RegexConverter, self).__init__(url_map)
+        self.regex = items[0]
+
+app.url_map.converters['regex'] = RegexConverter
+
 
 class QueueListView(MethodView):
     def get(self):

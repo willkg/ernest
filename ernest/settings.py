@@ -18,6 +18,9 @@ DEBUG = truthiness(os.environ.get('DEBUG', True))
 # Set the Bugzilla API url.
 BUGZILLA_API_URL = 'https://api-dev.bugzilla.mozilla.org/latest'
 
+# List of Bugzilla logins that are also considered Ernest admin. These
+# people can create new projects, sprints, etc.
+ADMIN = []
 
 # ------------------------------------------------
 # Database

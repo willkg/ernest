@@ -2,6 +2,7 @@
 Flask==0.10.1
 Flask-Script==0.6.2
 Flask-SQLAlchemy==1.0
+alembic==0.6.0
 pytz==2013.6
 requests==2.0.0
 python-memcached==1.53

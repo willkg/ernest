@@ -1,6 +1,7 @@
 import datetime
 import json
 import os
+import re
 import uuid
 
 import requests
@@ -50,6 +51,21 @@ register_error_handlers(app)
 db = SQLAlchemy(app)
 
 
+def slugify(text, delim=u'-'):
+    """Generates an ASCII-only slug."""
+    word_split_re = re.compile(r'[\t !"#$%&\'()*\-/<=>?@\[\\\]^_`{|},.]+')
+    result = []
+    for word in word_split_re.split(text.lower()):
+        word = word.encode('ascii', 'ignore')
+        if word:
+            result.append(word)
+
+    if not result:
+        result = ['no', 'slug']
+
+    return unicode(delim.join(result))
+
+
 # ----------------------------------------
 # Models
 # ----------------------------------------
@@ -57,9 +73,11 @@ db = SQLAlchemy(app)
 class Project(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(20), unique=True)
+    slug = db.Column(db.String(20), unique=True)
 
     def __init__(self, name):
         self.name = name
+        self.slug = slugify(name)
 
     def __repr__(self):
         return '<Project {0}>'.format(self.name)
@@ -68,6 +86,7 @@ class Project(db.Model):
 class Sprint(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(20))
+    slug = db.Column(db.String(20))
     start_date = db.Column(db.DateTime)
     end_date = db.Column(db.DateTime)
     notes = db.Column(db.Text)
@@ -77,9 +96,14 @@ class Sprint(db.Model):
     project = db.relationship('Project',
         backref=db.backref('sprints', lazy='dynamic'))
 
+    __table_args__ = (
+        db.UniqueConstraint('project_id', 'name', name='_project_sprint_uc'),
+    )
+
     def __init__(self, project_id, name):
         self.project_id = project_id
         self.name = name
+        self.slug = slugify(name)
 
     def __repr__(self):
         return '<Sprint {0}:{1}>'.format(self.project, self.name)
@@ -145,25 +169,45 @@ class QueueListView(MethodView):
         )
 
 
-class SprintListView(MethodView):
+class ProjectListView(MethodView):
     def get(self):
+        projects = db.session.query(Project).all()
+
         return render_template(
-            'sprint_list.html',
-            # FIXME - hard-coded
-            sprints=[
-                ('support.mozilla.org', '2013.19'),
-                ('support.mozilla.org', '2013.20'),
-            ]
+            'project_list.html',
+            projects=projects,
         )
 
 
-class SprintView(MethodView):
-    def get(self, product, sprint):
+class ProjectSprintListView(MethodView):
+    def get(self, projectslug):
+        # FIXME - this can raise an error
+        project = db.session.query(Project).filter_by(slug=projectslug).one()
+
+        # FIXME - this can raise an error
+        sprints = db.session.query(Sprint).filter_by(
+            project_id=project.id).all()
+        return render_template(
+            'sprint_list.html',
+            # FIXME - hard-coded
+            project=project,
+            sprints=sprints,
+        )
+
+
+class ProjectSprintView(MethodView):
+    def get(self, projectslug, sprintslug):
+        # FIXME - this can raise an error
+        project = db.session.query(Project).filter_by(slug=projectslug).one()
+
+        # FIXME - this can raise an error
+        sprint = db.session.query(Sprint).filter_by(project_id=project.id, slug=sprintslug).one()
+
         token = request.cookies.get('token')
         changed_after = request.args.get('since')
 
         components = [
-            {'product': product, 'component': '__ANY__'}
+            {'product': project.name, 'component': '__ANY__'}
         ]
 
         bz = BugzillaTracker(app)
@@ -180,7 +224,7 @@ class SprintView(MethodView):
                 'flags',
                 'groups',
             ),
-            sprint=sprint,
+            sprint=sprint.name,
             token=token,
             changed_after=changed_after,
         )
@@ -310,9 +354,11 @@ def index():
     return render_template('index.html')
 
 
-app.add_url_rule('/api/sprint/<product>/<sprint>',
-                 view_func=SprintView.as_view('sprint'))
-app.add_url_rule('/api/sprint/', view_func=SprintListView.as_view('sprint-list'))
+app.add_url_rule('/api/project/<projectslug>/<sprintslug>',
+                 view_func=ProjectSprintView.as_view('project-sprint'))
+app.add_url_rule('/api/project/<projectslug>',
+                 view_func=ProjectSprintListView.as_view('project-sprint-list'))
+app.add_url_rule('/api/project', view_func=ProjectListView.as_view('project-list'))
 app.add_url_rule('/api/logout', view_func=LogoutView.as_view('logout'))
 app.add_url_rule('/api/login', view_func=LoginView.as_view('login'))
 

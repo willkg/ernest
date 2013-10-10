@@ -34,7 +34,7 @@ Install and configure
    You can see which settings are editable/overrideable in
    ``ernest/settings.py``.
 
-5. Create the database::
+5. Create the database and give it the alembic stamp::
 
        $ python manage.py db_create
 
@@ -42,6 +42,18 @@ Install and configure
    ``ernest/settings_local.py``.
 
 6. Install and run memcached.
+
+
+Create projects and sprints
+===========================
+
+To create a project::
+
+    $ python manage.py create_project <projectname>
+
+To create a sprint for that project::
+
+    $ python manage.py create_sprint <sprintname>
 
 
 Run server
@@ -55,12 +67,7 @@ Run::
 Run tests
 =========
 
-Ernest is in rapid prototype spike development and changes on the
-whims of New England weather.
-
-Ergo, there are no tests, yet.
-
-When there are tests, then you can run them with::
+Run tests with::
 
     $ nosetests
 
@@ -72,6 +79,9 @@ Helpful documentation
 * Flask: http://flask.pocoo.org/docs/
 * Bootstrap: http://getbootstrap.com/2.3.2/index.html
 * jQuery: http://api.jquery.com/
+* SQLAlchemy: http://www.sqlalchemy.org/
+* Flask-SQLAlchemy: http://pythonhosted.org/Flask-SQLAlchemy/index.html
+* Alembic: https://alembic.readthedocs.org/en/latest/index.html
 
 
 Locations of things

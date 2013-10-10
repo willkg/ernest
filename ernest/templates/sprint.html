@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
   <div id="content">
-    <h1>Sprint: {{ sprint }}
+    <h1>Sprint: {{ sprint.name }}
       {% if not bugs_with_no_points %}
         {% if closed_points == total_points %}
           <span class="label label-success">SUCCESS! ☺</span>

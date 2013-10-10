@@ -14,7 +14,7 @@
         <div class="navbar-inner">
           <a class="brand" href="{{ url_for('index') }}">Ernest</a>
           <ul class="nav">
-            <li class="pull-left"><a href="{{ url_for('sprint-list') }}">Sprints</a></li>
+            <li class="pull-left"><a href="{{ url_for('project-list') }}">Projects</a></li>
           </ul>
           <ul class="nav pull-right">
             {% if request.cookies.get('token') %}

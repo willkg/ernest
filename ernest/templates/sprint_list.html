@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 {% block content %}
   <div id="content">
-    <h1>Sprint list</h1>
+    <h1>Sprints for {{ project.name }}</h1>
     <ul>
-      {% for product, sprint in sprints %}
-        <li><a href="{{ url_for('sprint', product=product, sprint=sprint) }}">{{ sprint }}</a></li>
+      {% for sprint in sprints %}
+        <li><a href="{{ url_for('project-sprint', projectslug=project.slug, sprintslug=sprint.slug) }}">{{ sprint.name }}</a></li>
       {% endfor %}
     </ul>
   </div>

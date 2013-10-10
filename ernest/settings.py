@@ -29,7 +29,10 @@ ADMIN = []
 # This is the url to the database.
 # For a sqlite file-based database, use sqlite:///path/to/db
 SQLALCHEMY_DATABASE_URI = os.environ.get(
-    'SQLALCHEMY_DATABASE_URI', 'sqlite:///../ernest_app.db')
+    'SQLALCHEMY_DATABASE_URI',
+    'sqlite:///{0}/ernest_app.db'.format(
+        os.path.join(os.path.dirname(__file__), '..'))
+)
 
 
 # ------------------------------------------------

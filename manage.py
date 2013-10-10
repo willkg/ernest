@@ -2,10 +2,10 @@
 import subprocess
 
 from flask.ext.script import Manager
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, OperationalError
 from sqlalchemy.orm.exc import NoResultFound
 
-from ernest.main import app, db
+from ernest.main import app, db, Project, Sprint
 
 
 manager = Manager(app)
@@ -19,7 +19,17 @@ def call_command(cmd, verbose=False):
 
 @manager.command
 def db_create():
-    """Create the database"""
+    """Create the tables and do alembic stuff"""
+    try:
+        db.engine.execute('select * from project')
+        print 'Database already exists with tables.'
+        return
+
+    except OperationalError:
+        # An operational error here means that the "project" table
+        # doesn't exist so we should create things!
+        pass
+
     print 'Creating {0}....'.format(
         app.config.get('SQLALCHEMY_DATABASE_URI'))
 
@@ -37,9 +47,7 @@ def db_create():
 
 @manager.command
 def create_project(projectname):
-
-    from ernest.main import Project
-
+    """Create a single project"""
     try:
         new_project = Project(projectname)
         db.session.add(new_project)
@@ -53,7 +61,7 @@ def create_project(projectname):
 
 @manager.command
 def create_sprint(projectname, sprintname):
-    from ernest.main import Project, Sprint
+    """Create a new spring for a project"""
     try:
         proj = db.session.query(Project).filter_by(name=projectname).one()
     except NoResultFound:
@@ -62,7 +70,6 @@ def create_sprint(projectname, sprintname):
 
     try:
         new_sprint = Sprint(project_id=proj.id, name=sprintname)
-
         db.session.add(new_sprint)
         db.session.commit()
     except IntegrityError:
@@ -71,6 +78,7 @@ def create_sprint(projectname, sprintname):
         return
 
     print 'Created sprint {0} for project {1}.'.format(sprintname, projectname)
+
 
 if __name__ == '__main__':
     manager.run()

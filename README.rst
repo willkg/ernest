@@ -72,6 +72,30 @@ Run tests with::
     $ nosetests
 
 
+Manage db and migrations
+========================
+
+To generate the tables for your db, do::
+
+    $ python manage.py db_create
+
+Note: If you run this command twice, it shouldn't wipe your data.
+
+To update your db by applying all unapplied migrations, do::
+
+    $ alembic upgrade head
+
+To create a new migration, do::
+
+    $ alembic revision -m "some message" --autogenerate
+
+See: https://alembic.readthedocs.org/en/latest/tutorial.html#auto-generating-migrations
+
+You can see the current migration with::
+
+    $ alembic current
+
+
 Helpful documentation
 =====================
 

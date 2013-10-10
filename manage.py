@@ -2,7 +2,7 @@
 import subprocess
 
 from flask.ext.script import Manager
-from sqlalchemy.exc import IntegrityError, OperationalError
+from sqlalchemy.exc import IntegrityError, OperationalError, ProgrammingError
 from sqlalchemy.orm.exc import NoResultFound
 
 from ernest.main import app, db, Project, Sprint
@@ -25,7 +25,7 @@ def db_create():
         print 'Database already exists with tables.'
         return
 
-    except OperationalError:
+    except (OperationalError, ProgrammingError):
         # An operational error here means that the "project" table
         # doesn't exist so we should create things!
         pass

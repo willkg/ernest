@@ -53,7 +53,7 @@ To create a project::
 
 To create a sprint for that project::
 
-    $ python manage.py create_sprint <sprintname>
+    $ python manage.py create_sprint <projectname> <sprintname>
 
 
 Run server

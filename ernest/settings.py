@@ -15,6 +15,9 @@ DEBUG = truthiness(os.environ.get('DEBUG', True))
 # Set the SECRET_KEY in your settings_local.py file.
 # e.g. SECRET_KEY = 'ou812'
 
+# Set the Bugzilla url for logging in via http post.
+BUGZILLA_LOGIN_URL = 'https://bugzilla.mozilla.org/index.cgi'
+
 # Set the Bugzilla API url.
 BUGZILLA_API_URL = 'https://api-dev.bugzilla.mozilla.org/latest'
 

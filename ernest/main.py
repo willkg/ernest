@@ -6,7 +6,8 @@ import uuid
 
 import requests
 
-from flask import Flask, request, make_response, abort, jsonify, send_file, render_template
+from flask import (Flask, request, make_response, abort, jsonify,
+                   send_file, render_template)
 from flask.views import MethodView
 from flask.ext.sqlalchemy import SQLAlchemy
 
@@ -23,9 +24,6 @@ from .version import VERSION, VERSION_RAW
 
 DAY = 60 * 60 * 24
 MONTH = DAY * 30
-
-# FIXME - move this to config file
-LOGIN_URL = 'https://bugzilla.mozilla.org/index.cgi'
 
 
 # ----------------------------------------
@@ -304,7 +302,8 @@ class LoginView(MethodView):
             'GoAheadAndLogIn': 'Log in'
         }
         login_response = {}
-        r = requests.post(LOGIN_URL, data=login_payload)
+        r = requests.post(app.config['BUGZILLA_LOGIN_URL'],
+                          data=login_payload)
         cookies = requests.utils.dict_from_cookiejar(r.cookies)
         if 'Bugzilla_login' in cookies:
             token = str(uuid.uuid4())

@@ -213,6 +213,7 @@ class ProjectSprintView(MethodView):
             components,
             fields=(
                 'id',
+                'priority',
                 'summary',
                 'status',
                 'whiteboard',

@@ -40,6 +40,7 @@
     <table id="bug-table" class="table-striped table-condensed">
       <tr>
         <th>ID</th>
+        <th>Pri</th>
         <th>summary</th>
         <th>last updated</th>
         <th>depends on</th>
@@ -49,6 +50,7 @@
       {% for bug in bugs %}
         <tr class="bug-row bug-row-{{ bug.status.lower() }}">
           <td><a href="https://bugzilla.mozilla.org/show_bug.cgi?id={{ bug.id }}">{{ bug.id }}</a></td>
+          <td>{{ bug.priority }}</td>
           <td>
             {% if bug.securitygroup %}
               <span class="label label-important">SECURE</span>

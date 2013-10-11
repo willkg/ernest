@@ -64,7 +64,7 @@
             {% endif %}
             {{ bug.summary }}
             {% for flag in bug.whiteboardflags %}
-              <span class="label">{{ flag }}
+              <span class="label">{{ flag }}</span>
             {% endfor %}
           </td>
           <td>{{ bug.last_change_time|df('%m-%d-%Y %H:%M') }}</td>

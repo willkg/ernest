@@ -61,7 +61,7 @@
             {% if bug.needinfo %}
               <span class="label label-warning" title="{{ bug.needinfo }}">NEEDINFO</span>
             {% endif %}
-            {% if bug.depends_on %}
+            {% if bug.is_blocked %}
               <span class="label label-important" title="{{ bug.depends_on }}">BLOCKED</span>
             {% endif %}
             {{ bug.summary }}

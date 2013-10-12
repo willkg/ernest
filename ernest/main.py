@@ -210,7 +210,6 @@ class ProjectSprintView(MethodView):
 
         bz = BugzillaTracker(app)
         bug_data = bz.fetch_bugs(
-            components,
             fields=(
                 'id',
                 'priority',
@@ -223,12 +222,13 @@ class ProjectSprintView(MethodView):
                 'flags',
                 'groups',
             ),
+            components=components,
             sprint=sprint.name,
             token=token,
             changed_after=changed_after,
         )
 
-        bugs = bug_data['bugs']
+        bugs = bz.mark_is_blocked(bug_data['bugs'], token)
         total_points = 0
         closed_points = 0
         bugs_with_no_points = 0

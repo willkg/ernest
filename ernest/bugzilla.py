@@ -88,9 +88,9 @@ class BugzillaTracker(object):
         id_to_status = {}
         blockers = set()
 
-        # Go through all the bugs and initialize the 'is_blocked'
-        # field to False, build up the id_to_status map and add any
-        # bugs that the bug depends on to the blockers set.
+        # Go through all the bugs and initialize the 'is_blocked' field
+        # to False, build up the id_to_status map and add any bugs
+        # that the bug depends on to the blockers set.
         for bug in bugs:
             bug['is_blocked'] = False
             id_to_status[bug['id']] = bug['status']
@@ -135,9 +135,7 @@ class BugzillaTracker(object):
                 changed_after=changed_after,
             )
             for key in bug_data:
-                if key =
-
-        = 'bugs' and changed_after:
+                if key == 'bugs' and changed_after:
                     # For some ungodly reason, even if you pass `changed_after`
                     # into the bugzilla API you sometimes get bugs that were last
                     # updated BEFORE the `changed_after` parameter specifies.
@@ -148,9 +146,7 @@ class BugzillaTracker(object):
                     # want those that are greater than `:changed_after`.
                     bugs = [
                         bug for bug in bug_data[key]
-                        if bu
-
-        g['last_change_time'] > changed_after
+                        if bug['last_change_time'] > changed_after
                     ]
                     combined[key].extend(bugs)
                 else:

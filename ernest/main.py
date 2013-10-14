@@ -266,6 +266,14 @@ class ProjectSprintView(MethodView):
         latest_change_time = max(
             [bug.get('last_change_time', 0) for bug in bug_data['bugs']])
 
+        # FIXME - this is a stopgap until we have sorting in the
+        # table. It tries hard to sort P1 through P5 and then bugs
+        # that don't have a priority (for which the value is the
+        # helpful '--') go at the bottom.
+        bugs.sort(key=lambda bug: (
+            bug.get('priority') if bug.get('priority') != '--' else 'P6')
+        )
+
         return render_template(
             'sprint.html',
             sprint=sprint,

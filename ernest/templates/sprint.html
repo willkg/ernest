@@ -42,8 +42,9 @@
         <th>ID</th>
         <th>Pri</th>
         <th>summary</th>
-        <th>last updated</th>
         <th>depends on</th>
+        <th>assigned to</th>
+        <th>last updated</th>
         <th>status</th>
         <th>points</th>
       </tr>
@@ -69,12 +70,13 @@
               <span class="label">{{ flag }}</span>
             {% endfor %}
           </td>
-          <td>{{ bug.last_change_time|df('%m-%d-%Y %H:%M') }}</td>
           <td>
             {% for blocker in bug.depends_on %}
               <a href="http://bugzilla.mozilla.org/show_bug.cgi?id={{ blocker }}">{{ blocker }}</a>
             {% endfor %}
           </td>
+          <td>{{ bug.assigned_to.real_name }}</td>
+          <td>{{ bug.last_change_time|df('%m-%d-%Y %H:%M') }}</td>
           <td>{{ bug.status }}</td>
           <td>{{ bug.points }}</td>
         </tr>

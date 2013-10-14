@@ -221,6 +221,7 @@ class ProjectSprintView(MethodView):
                 'depends_on',
                 'flags',
                 'groups',
+                'assigned_to',
             ),
             components=components,
             sprint=sprint.name,
@@ -237,6 +238,11 @@ class ProjectSprintView(MethodView):
             bug['needinfo'] = []
             bug['confidentialgroup'] = False
             bug['securitygroup'] = False
+
+            if bug.get('assigned_to', {})['real_name'].startswith('Nobody'):
+                # This nixes the assigned_to because it's silly long
+                # when no one is assigned to the bug.
+                bug['assigned_to'] = {}
 
             for flag in bug.get('flags', []):
                 if flag['name'] == 'needinfo':

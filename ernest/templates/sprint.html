@@ -42,7 +42,6 @@
         <th>ID</th>
         <th>Pri</th>
         <th>summary</th>
-        <th>depends on</th>
         <th>assigned to</th>
         <th>last updated</th>
         <th>status</th>
@@ -63,16 +62,16 @@
               <span class="label label-warning" title="{{ bug.needinfo }}">NEEDINFO</span>
             {% endif %}
             {% if bug.is_blocked %}
-              <span class="label label-important" title="{{ bug.depends_on }}">BLOCKED</span>
+              <span class="label label-important" title="{{ bug.open_blockers }}">
+                BLOCKED
+                {% for blocker in bug.open_blockers %}
+                  <a href="http://bugzilla.mozilla.org/show_bug.cgi?id={{ blocker }}">{{ blocker }}</a>
+                {% endfor %}
+              </span>
             {% endif %}
             {{ bug.summary }}
             {% for flag in bug.whiteboardflags %}
               <span class="label">{{ flag }}</span>
-            {% endfor %}
-          </td>
-          <td>
-            {% for blocker in bug.depends_on %}
-              <a href="http://bugzilla.mozilla.org/show_bug.cgi?id={{ blocker }}">{{ blocker }}</a>
             {% endfor %}
           </td>
           <td>{{ bug.assigned_to.real_name }}</td>

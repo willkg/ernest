@@ -93,6 +93,7 @@ class BugzillaTracker(object):
         # that the bug depends on to the blockers set.
         for bug in bugs:
             bug['is_blocked'] = False
+            bug['open_blockers'] = []
             id_to_status[bug['id']] = bug['status']
             blockers.update(bug.get('depends_on', []))
 
@@ -117,7 +118,7 @@ class BugzillaTracker(object):
             for blocker in bug.get('depends_on', []):
                 if not self.is_closed(id_to_status[blocker]):
                     bug['is_blocked'] = True
-                    break
+                    bug['open_blockers'].append(blocker)
 
         return bugs
 

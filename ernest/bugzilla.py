@@ -60,7 +60,8 @@ class BugzillaTracker(object):
             request.method,
             self.bzurl + '/{0}'.format(path),
             params=request_arguments,
-            data=request.form
+            data=request.form,
+            timeout=60.0
         )
         return r.text
 
@@ -116,9 +117,17 @@ class BugzillaTracker(object):
         # if any of the bugs it depends on is not closed.
         for bug in bugs:
             for blocker in bug.get('depends_on', []):
-                if not self.is_closed(id_to_status[blocker]):
-                    bug['is_blocked'] = True
-                    bug['open_blockers'].append(blocker)
+                try:
+                    if not self.is_closed(id_to_status[blocker]):
+                        bug['is_blocked'] = True
+                        bug['open_blockers'].append(blocker)
+                except KeyError:
+                    # FIXME: This most likely means that the user
+                    # viewing the bug list doesn't have access to this
+                    # blocker and therefore cannot see it. I don't
+                    # know what the right thing to do here is. So I'm
+                    # going to ignore it for now.
+                    pass
 
         return bugs
 
@@ -133,7 +142,7 @@ class BugzillaTracker(object):
                 sprint=sprint,
                 fields=fields,
                 token=token,
-                changed_after=changed_after,
+                changed_after=changed_after
             )
             for key in bug_data:
                 if key == 'bugs' and changed_after:
@@ -191,6 +200,7 @@ class BugzillaTracker(object):
             'GET',
             url,
             params=params,
+            timeout=60.0
         )
         if r.status_code != 200:
             raise BugzillaError(r.text)

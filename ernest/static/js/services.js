@@ -12,34 +12,50 @@ ernestServices.factory('Api', ['$resource',
             return JSON.parse(data);
         }
 
-        function projUrl() {
-            return '#/project/' + this.slug;
+        function bugUrl() {
+            return 'https://bugzilla.mozilla.org/show_bug.cgi?id=' + this.id;
         }
 
-        function sprintUrl() {
-            return '#/project/' + this.project.slug + '/' + this.slug;
+        function augmentProject(proj) {
+            proj.url = '/project/' + proj.slug;
+            return proj;
         }
 
-        function addMethods(data, headersGetter) {
-            if (data.projects) {
-                data.projects = data.projects.map(function(proj) {
-                    proj.url = projUrl.bind(proj);
-                    return proj;
+        function augmentSprint(project, sprint) {
+            sprint.project = project;
+            sprint.url = '/project/' + project.slug + '/' + sprint.slug;
+            return sprint;
+        }
+
+        function augmentBug(bug) {
+            var baseUrl = 'https://bugzilla.mozilla.org/show_bug.cgi?id='
+            bug.url = baseUrl + bug.id;
+            if (bug.depends_on) {
+                bug.depends_on = bug.depends_on.map(function(bugId) {
+                    return {
+                        id: bugId,
+                        url: baseUrl + bugId,
+                    };
                 });
+            }
+            return bug;
+        }
+
+        function augment(data, headersGetter) {
+            if (data.projects) {
+                data.projects = data.projects.map(augmentProject);
             }
             if (data.project) {
-                data.project.url = projUrl.bind(data.project);
+                data.project = augmentProject(data.project);
             }
             if (data.sprints) {
-                data.sprints = data.sprints.map(function(sprint) {
-                    sprint.project = data.project;
-                    sprint.url = sprintUrl.bind(sprint);
-                    return sprint;
-                });
+                data.sprints = data.sprints.map(augmentSprint.bind(null, data.project));
             }
             if (data.sprint) {
-                data.sprint.project = data.project;
-                data.sprint.url = sprintUrl.bind(data.sprint);
+                data.sprint = augmentSprint(data.project, data.sprint);
+            }
+            if (data.bugs) {
+                data.bugs = data.bugs.map(augmentBug);
             }
             return data;
         }
@@ -48,13 +64,13 @@ ernestServices.factory('Api', ['$resource',
             query: {
                 method: 'GET',
                 isArray: false,
-                transformResponse: [parseJSON, addMethods],
+                transformResponse: [parseJSON, augment],
                 cache: true
             },
             get: {
                 method: 'GET',
                 isArray: false,
-                transformResponse: [parseJSON, addMethods],
+                transformResponse: [parseJSON, augment],
                 cache: true
             },
         });

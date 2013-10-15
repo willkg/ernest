@@ -6,7 +6,7 @@ import uuid
 import requests
 
 from flask import (Flask, request, make_response, abort, jsonify,
-                   send_file, render_template, json)
+                   send_file, json)
 from flask.views import MethodView
 from flask.ext.sqlalchemy import SQLAlchemy
 
@@ -161,12 +161,6 @@ def cache_get(key, default=None):
 # Template stuff
 # ----------------------------------------
 
-@app.template_filter('df')
-def dateformat_filter(d, fmt):
-    if isinstance(d, basestring):
-        d = datetime.datetime.strptime(d, "%Y-%m-%dT%H:%M:%SZ")
-    return d.strftime(fmt)
-
 
 @app.context_processor
 def basecontext():
@@ -186,13 +180,6 @@ class RegexConverter(BaseConverter):
         self.regex = items[0]
 
 app.url_map.converters['regex'] = RegexConverter
-
-
-class QueueListView(MethodView):
-    def get(self):
-        return render_template(
-            'queue.html'
-        )
 
 
 class ProjectListView(MethodView):
@@ -293,6 +280,7 @@ class ProjectSprintView(MethodView):
             [bug.get('last_change_time', 0) for bug in bug_data['bugs']])
 
         return jsonify({
+            'project': project,
             'sprint': sprint,
             'latest_change_time': latest_change_time,
             'bugs': bugs,
@@ -315,9 +303,6 @@ class LogoutView(MethodView):
 
 
 class LoginView(MethodView):
-    def get(self):
-        return render_template('index.html')
-
     def post(self):
         json_data = request.get_json(force=True)
         login_payload = {
@@ -351,6 +336,17 @@ class LoginView(MethodView):
             return response
 
 
+@app.route('/')
+@app.route('/<start>')
+@app.route('/<start>/<path:path>')
+def static_stuff(start=None, path=None):
+    """Handles static files and falls back to serving the Angular homepage."""
+    if start in ['css', 'img', 'js', 'font', 'partials']:
+        return send_file('static/%s/%s' % (start, path))
+    else:
+        return send_file('static/index.html')
+
+
 # FIXME - we don't use this so far. it allows you to do bugzilla api
 # calls from javascript, but it seems to use urlencoded data, so I
 # don't know what to do with this.
@@ -367,22 +363,12 @@ def favicon():
         mimetype='image/vnd.microsoft.icon')
 
 
-# Handles all static files
-@app.route('/<regex("css|img|js|font"):start>/<path:path>')
-def static_stuff(start, path):
-    return send_file('static/%s/%s' % (start, path))
-
-
-@app.route('/')
-def index():
-    return render_template('index.html')
-
-
 app.add_url_rule('/api/project/<projectslug>/<sprintslug>',
                  view_func=ProjectSprintView.as_view('project-sprint'))
 app.add_url_rule('/api/project/<projectslug>',
                  view_func=ProjectSprintListView.as_view('project-sprint-list'))
-app.add_url_rule('/api/project', view_func=ProjectListView.as_view('project-list'))
+app.add_url_rule('/api/project',
+                 view_func=ProjectListView.as_view('project-list'))
 app.add_url_rule('/api/logout', view_func=LogoutView.as_view('logout'))
 app.add_url_rule('/api/login', view_func=LoginView.as_view('login'))
 

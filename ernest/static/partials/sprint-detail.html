@@ -50,7 +50,7 @@
     </tr>
 
     <tr class="bug-row" ng-class="'bug-row-' + bug.status.toLowerCase()" ng-repeat="bug in bugs">
-      <td><a ng-href="bug.url">{{bug.id}}</a></td>
+      <td><a ng-href="{{bug.url}}">{{bug.id}}</a></td>
       <td>{{bug.priority}}</td>
       <td>
         <span class="label label-important" ng-show="bug.securitygroup">SECURE</span>
@@ -62,7 +62,7 @@
       </td>
       <td>{{bug.last_change_time|date:"M-d-yyyy H:m"}}</td>
       <td>
-        <a ng-repeat="blocker in bug.depends_on" ng-href="blocker.url">{{blocker}}</a>
+        <a ng-repeat="blocker in bug.depends_on" ng-href="{{blocker.url}}">{{blocker.id}}</a>
       </td>
       <td>{{bug.status}}</td>
       <td>{{bug.points}}</td>

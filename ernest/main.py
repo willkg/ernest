@@ -1,5 +1,4 @@
 import datetime
-import json
 import os
 import re
 import uuid
@@ -7,7 +6,7 @@ import uuid
 import requests
 
 from flask import (Flask, request, make_response, abort, jsonify,
-                   send_file, render_template)
+                   send_file, render_template, json)
 from flask.views import MethodView
 from flask.ext.sqlalchemy import SQLAlchemy
 
@@ -64,9 +63,20 @@ def slugify(text, delim=u'-'):
     return unicode(delim.join(result))
 
 
+class ExtensibleJSONEncoder(json.JSONEncoder):
+    """A JSON decoder that will check for a .__json__ methon on objects."""
+    def default(self, obj):
+        if hasattr(obj, '__json__'):
+            return obj.__json__()
+        return super(ExtensibleJSONEncoder, self).default(obj)
+
+
+app.json_encoder = ExtensibleJSONEncoder
+
 # ----------------------------------------
 # Models
 # ----------------------------------------
+
 
 class Project(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -79,6 +89,13 @@ class Project(db.Model):
 
     def __repr__(self):
         return '<Project {0}>'.format(self.name)
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'slug': self.slug,
+        }
 
 
 class Sprint(db.Model):
@@ -105,6 +122,17 @@ class Sprint(db.Model):
 
     def __repr__(self):
         return '<Sprint {0}:{1}>'.format(self.project, self.name)
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'slug': self.slug,
+            'start_date': self.start_date,
+            'end_date': self.end_date,
+            'notes': self.notes,
+            'postmortem': self.postmortem,
+        }
 
 
 # ----------------------------------------
@@ -170,11 +198,9 @@ class QueueListView(MethodView):
 class ProjectListView(MethodView):
     def get(self):
         projects = db.session.query(Project).all()
-
-        return render_template(
-            'project_list.html',
-            projects=projects,
-        )
+        return jsonify({
+            'projects': projects,
+        })
 
 
 class ProjectSprintListView(MethodView):
@@ -185,12 +211,11 @@ class ProjectSprintListView(MethodView):
         # FIXME - this can raise an error
         sprints = db.session.query(Sprint).filter_by(
             project_id=project.id).all()
-        return render_template(
-            'sprint_list.html',
-            # FIXME - hard-coded
-            project=project,
-            sprints=sprints,
-        )
+
+        return jsonify({
+            'project': project,
+            'sprints': sprints
+        })
 
 
 class ProjectSprintView(MethodView):
@@ -199,7 +224,8 @@ class ProjectSprintView(MethodView):
         project = db.session.query(Project).filter_by(slug=projectslug).one()
 
         # FIXME - this can raise an error
-        sprint = db.session.query(Sprint).filter_by(project_id=project.id, slug=sprintslug).one()
+        sprint = (db.session.query(Sprint)
+                  .filter_by(project_id=project.id, slug=sprintslug).one())
 
         token = request.cookies.get('token')
         changed_after = request.args.get('since')
@@ -266,16 +292,14 @@ class ProjectSprintView(MethodView):
         latest_change_time = max(
             [bug.get('last_change_time', 0) for bug in bug_data['bugs']])
 
-        return render_template(
-            'sprint.html',
-            sprint=sprint,
-            latest_change_time=latest_change_time,
-            bugs=bugs,
-            total_points=total_points,
-            closed_points=closed_points,
-            bugs_with_no_points=bugs_with_no_points,
-            last_load=datetime.datetime.now(),
-        )
+        return jsonify({
+            'sprint': sprint,
+            'latest_change_time': latest_change_time,
+            'bugs': bugs,
+            'total_points': total_points,
+            'closed_points': closed_points,
+            'bugs_with_no_points': bugs_with_no_points,
+        })
 
 
 class LogoutView(MethodView):

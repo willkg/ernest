@@ -1,0 +1,72 @@
+<div id="content">
+  <h1>
+    Sprint: {{sprint.name}}
+    <span ng-switch="completionState">
+      <span class="label label-info" ng-switch-when="almost">
+        Almost there... Work faster! ⛏
+      </span>
+      <span class="label label-success" ng-switch-when="done">
+        SUCCESS! ☺
+      </span>
+    </span>
+  </h1>
+
+  <div class="row">
+    <div class="span6">
+      <dl class="dl-horizontal">
+        <dt>Last refresh</dt>
+        <dd>{{last_load|date:"M-d-yyyy H:m"}}</dd>
+
+        <dt>Last bug change</dt>
+        <dd>{{latest_change_time|date:"M-d-yyyy H:m"}}</dd>
+
+      </dl>
+    </div>
+    <div class="span6">
+      <dl class="dl-horizontal">
+        <span ng-show="bugs_with_no_points">
+          <dt class="text-error">Bugs with no points</dt>
+          <dd class="text-error">{{ bugs_with_no_points }}</dd>
+          </span>
+        <dt>Total points</dt>
+        <dd>{{ total_points }}</dd>
+
+        <dt>Points completed</dt>
+        <dd>{{ closed_points }} / {{ total_points }}</dd>
+      </dl>
+    </div>
+  </div>
+
+
+  <table id="bug-table" class="table-striped table-condensed">
+    <tr>
+      <th>ID</th>
+      <th>Pri</th>
+      <th>summary</th>
+      <th>last updated</th>
+      <th>depends on</th>
+      <th>status</th>
+      <th>points</th>
+    </tr>
+
+    <tr class="bug-row" ng-class="'bug-row-' + bug.status.toLowerCase()" ng-repeat="bug in bugs">
+      <td><a ng-href="bug.url">{{bug.id}}</a></td>
+      <td>{{bug.priority}}</td>
+      <td>
+        <span class="label label-important" ng-show="bug.securitygroup">SECURE</span>
+        <span class="label label-important" ng-show="bug.confidential">CONFIDENTIAL</span>
+        <span class="label label-warning" ng-show="bug.needinfo">NEEDSINFO</span>
+        <span class="label label-important" ng-show="bug.depends_on">BLOCKED</span>
+        {{bug.summary}}
+        <span class="label" ng-repeat="flag in bug.whiteboard.flags">{{flag}}</span>
+      </td>
+      <td>{{bug.last_change_time|date:"M-d-yyyy H:m"}}</td>
+      <td>
+        <a ng-repeat="blocker in bug.depends_on" ng-href="blocker.url">{{blocker}}</a>
+      </td>
+      <td>{{bug.status}}</td>
+      <td>{{bug.points}}</td>
+    </tr>
+
+  </table>
+</div>

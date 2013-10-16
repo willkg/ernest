@@ -223,7 +223,6 @@ class ProjectSprintView(MethodView):
 
         bz = BugzillaTracker(app)
         bug_data = bz.fetch_bugs(
-            components,
             fields=(
                 'id',
                 'priority',
@@ -235,13 +234,15 @@ class ProjectSprintView(MethodView):
                 'depends_on',
                 'flags',
                 'groups',
+                'assigned_to',
             ),
+            components=components,
             sprint=sprint.name,
             token=token,
             changed_after=changed_after,
         )
 
-        bugs = bug_data['bugs']
+        bugs = bz.mark_is_blocked(bug_data['bugs'], token)
         total_points = 0
         closed_points = 0
         bugs_with_no_points = 0
@@ -250,6 +251,11 @@ class ProjectSprintView(MethodView):
             bug['needinfo'] = []
             bug['confidentialgroup'] = False
             bug['securitygroup'] = False
+
+            if bug.get('assigned_to', {})['real_name'].startswith('Nobody'):
+                # This nixes the assigned_to because it's silly long
+                # when no one is assigned to the bug.
+                bug['assigned_to'] = {}
 
             for flag in bug.get('flags', []):
                 if flag['name'] == 'needinfo':
@@ -278,6 +284,14 @@ class ProjectSprintView(MethodView):
         # FIXME - this fails if there's no bug data
         latest_change_time = max(
             [bug.get('last_change_time', 0) for bug in bug_data['bugs']])
+
+        # FIXME - this is a stopgap until we have sorting in the
+        # table. It tries hard to sort P1 through P5 and then bugs
+        # that don't have a priority (for which the value is the
+        # helpful '--') go at the bottom.
+        bugs.sort(key=lambda bug: (
+            bug.get('priority') if bug.get('priority') != '--' else 'P6')
+        )
 
         return jsonify({
             'project': project,

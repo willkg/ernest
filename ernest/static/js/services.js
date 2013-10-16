@@ -30,8 +30,8 @@ ernestServices.factory('Api', ['$resource',
         function augmentBug(bug) {
             var baseUrl = 'https://bugzilla.mozilla.org/show_bug.cgi?id='
             bug.url = baseUrl + bug.id;
-            if (bug.depends_on) {
-                bug.depends_on = bug.depends_on.map(function(bugId) {
+            if (bug.open_blockers) {
+                bug.open_blockers = bug.open_blockers.map(function(bugId) {
                     return {
                         id: bugId,
                         url: baseUrl + bugId,

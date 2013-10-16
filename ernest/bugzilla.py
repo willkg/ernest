@@ -60,12 +60,79 @@ class BugzillaTracker(object):
             request.method,
             self.bzurl + '/{0}'.format(path),
             params=request_arguments,
-            data=request.form
+            data=request.form,
+            timeout=60.0
         )
         return r.text
 
-    def fetch_bugs(self, components, fields, sprint=None, token=None,
-                   bucket_requests=3, changed_after=None):
+    def is_closed(self, status):
+        return status.lower() in ('resolved', 'verified')
+
+    def mark_is_blocked(self, bugs, token=None):
+        """Adds 'is_blocked' to all bugs
+
+        Goes through the bugs and generates a set of bug ids from the
+        depends_on field. Then it figures out whether those bugs are
+        open or closed and sets the 'is_blocked' field accordingly.
+
+        It does a bunch of loops so that it can do everything it needs
+        with at most one additional Bugzilla API request.
+
+        :arg bugs: The list of bugs to operate on
+        :arg token: The bugzilla session token (optional)
+
+        :returns: The bugs with the 'is_blocked' field set to True or
+            False
+
+        """
+
+        id_to_status = {}
+        blockers = set()
+
+        # Go through all the bugs and initialize the 'is_blocked' field
+        # to False, build up the id_to_status map and add any bugs
+        # that the bug depends on to the blockers set.
+        for bug in bugs:
+            bug['is_blocked'] = False
+            bug['open_blockers'] = []
+            id_to_status[bug['id']] = bug['status']
+            blockers.update(bug.get('depends_on', []))
+
+        blockers = [bug for bug in blockers
+                    if not self.is_closed(id_to_status.get(bug, ''))]
+
+        if not blockers:
+            # No blockers, so nothing to do!
+            return bugs
+
+        blocker_bugs = self._fetch_bugs(
+            ids=list(blockers),
+            token=token,
+            fields=('id', 'status'))
+
+        for bug in blocker_bugs['bugs']:
+            id_to_status[bug['id']] = bug['status']
+
+        # Go through all the original bugs and set the 'is_blocked' field
+        # if any of the bugs it depends on is not closed.
+        for bug in bugs:
+            for blocker in bug.get('depends_on', []):
+                try:
+                    if not self.is_closed(id_to_status[blocker]):
+                        bug['is_blocked'] = True
+                        bug['open_blockers'].append(blocker)
+                except KeyError:
+                    # FIXME: This most likely means that the user
+                    # viewing the bug list doesn't have access to this
+                    # blocker and therefore cannot see it. I don't
+                    # know what the right thing to do here is. So I'm
+                    # going to ignore it for now.
+                    pass
+
+        return bugs
+
+    def fetch_bugs(self, fields, components=None, sprint=None,
+                   token=None, bucket_requests=3, changed_after=None):
 
         combined = collections.defaultdict(list)
         for i in range(0, len(components), bucket_requests):
@@ -75,7 +142,7 @@ class BugzillaTracker(object):
                 sprint=sprint,
                 fields=fields,
                 token=token,
-                changed_after=changed_after,
+                changed_after=changed_after
             )
             for key in bug_data:
                 if key == 'bugs' and changed_after:
@@ -99,9 +166,9 @@ class BugzillaTracker(object):
 
     def fetch_bug(self, id_, token=None, refresh=False, fields=None):
         # @refresh is currently not implemented
-        return self._fetch_bugs(id=id_, token=token, fields=fields)
+        return self._fetch_bugs(ids=[id_], token=token, fields=fields)
 
-    def _fetch_bugs(self, id_=None, components=None, sprint=None, fields=None,
+    def _fetch_bugs(self, ids=None, components=None, sprint=None, fields=None,
                     token=None, changed_after=None):
         params = {}
 
@@ -126,13 +193,14 @@ class BugzillaTracker(object):
 
         url = self.bzurl + '/bug'
 
-        if id_:
-            url += '/%s' % id_
+        if ids:
+            params['id'] = ','.join(ids)
 
         r = requests.request(
             'GET',
             url,
             params=params,
+            timeout=60.0
         )
         if r.status_code != 200:
             raise BugzillaError(r.text)

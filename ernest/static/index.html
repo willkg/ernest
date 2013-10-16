@@ -18,25 +18,26 @@
         </ul>
 
         <ul class="nav pull-right">
-          <li><p class="navbar-text">Uh... login?</p></li>
-          <!---
-            This is the old login logic. I'm not sure what to do with it yet.
-          {% if request.cookies.get('token') %}
+          <span ng-show="loggedIn()">
             <li><p class="navbar-text">{{ request.cookies.username }}</p></li>
-            <li><a id="logout-link" href="#">Logout</a></li>
-          {% else %}
+            <li><a id="logout-link" href="#" ng-click="doLogout()">Logout</a></li>
+          </span>
+          <span ng-show="!loggedIn()">
             <li>
               <div id="login-form">
-                <input class="login-form" type="text" id="login-field"
-                       placeholder="Bugzilla login" name="login"/>
-                <input class="login-form" type="password" id="password-field"
-                       placeholder="Bugzilla password" name="password"/>
-                <button id="login-submit" class="btn btn-primary login-form">Submit</button>
+                <input class="login-form" type="text" ng-model="bz_username"
+                       placeholder="Bugzilla login"/>
+
+                <input class="login-form" type="password" ng-model="bz_password"
+                       placeholder="Bugzilla password"/>
+
+                <button id="login-submit" class="btn btn-primary login-form" ng-click="doLogin()">
+                  Submit
+                </button>
               </div>
               <a id="login-link" href="#">Login</a>
             </li>
-          {% endif %}
-          !-->
+          </span>
         </ul>
       </div>
     </div>
@@ -57,6 +58,7 @@
   <script src="/static/js/lib/angular.min.js"></script>
   <script src="/static/js/lib/angular-route.min.js"></script>
   <script src="/static/js/lib/angular-resource.min.js"></script>
+  <script src="/static/js/lib/angular-cookies.min.js"></script>
 
   <script src="/static/js/app.js"></script>
   <script src="/static/js/services.js"></script>

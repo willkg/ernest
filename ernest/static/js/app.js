@@ -5,6 +5,7 @@
 var ernest = angular.module('ernest', [
     'ngRoute',
     'ngResource',
+    'ngCookies',
     'ernest.filters',
     'ernest.services',
     'ernest.directives',
@@ -37,6 +38,30 @@ ernest.config(['$routeProvider', '$locationProvider',
     }
 ]);
 
-ernest.run(['$rootScope', function($rootScope) {
-    $rootScope.loading = 0;
-}]);
+ernest.run(['$rootScope', '$http', '$cookies',
+    function($rootScope, $http, $cookies) {
+        $rootScope.loading = 0;
+
+        $rootScope.bz_username = '';
+        $rootScope.bz_password = '';
+
+        $rootScope.doLogin = function() {
+            var data = {
+                'login': $rootScope.bz_username,
+                'password': $rootScope.bz_password,
+            };
+            $http.post('/api/login', data)
+                .error(function(err) {
+                    console.log(err);
+                });
+        };
+
+        $rootScope.doLogout = function() {
+            $http.post('/api/logout');
+        };
+
+        $rootScope.loggedIn = function() {
+            return $cookies.username;
+        }
+    }
+]);

@@ -1,5 +1,4 @@
 import datetime
-import json
 import os
 import re
 import uuid
@@ -7,7 +6,7 @@ import uuid
 import requests
 
 from flask import (Flask, request, make_response, abort, jsonify,
-                   send_file, render_template)
+                   send_file, json)
 from flask.views import MethodView
 from flask.ext.sqlalchemy import SQLAlchemy
 
@@ -64,9 +63,20 @@ def slugify(text, delim=u'-'):
     return unicode(delim.join(result))
 
 
+class ExtensibleJSONEncoder(json.JSONEncoder):
+    """A JSON decoder that will check for a .__json__ methon on objects."""
+    def default(self, obj):
+        if hasattr(obj, '__json__'):
+            return obj.__json__()
+        return super(ExtensibleJSONEncoder, self).default(obj)
+
+
+app.json_encoder = ExtensibleJSONEncoder
+
 # ----------------------------------------
 # Models
 # ----------------------------------------
+
 
 class Project(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -79,6 +89,13 @@ class Project(db.Model):
 
     def __repr__(self):
         return '<Project {0}>'.format(self.name)
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'slug': self.slug,
+        }
 
 
 class Sprint(db.Model):
@@ -105,6 +122,17 @@ class Sprint(db.Model):
 
     def __repr__(self):
         return '<Sprint {0}:{1}>'.format(self.project, self.name)
+
+    def __json__(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'slug': self.slug,
+            'start_date': self.start_date,
+            'end_date': self.end_date,
+            'notes': self.notes,
+            'postmortem': self.postmortem,
+        }
 
 
 # ----------------------------------------
@@ -133,12 +161,6 @@ def cache_get(key, default=None):
 # Template stuff
 # ----------------------------------------
 
-@app.template_filter('df')
-def dateformat_filter(d, fmt):
-    if isinstance(d, basestring):
-        d = datetime.datetime.strptime(d, "%Y-%m-%dT%H:%M:%SZ")
-    return d.strftime(fmt)
-
 
 @app.context_processor
 def basecontext():
@@ -160,21 +182,12 @@ class RegexConverter(BaseConverter):
 app.url_map.converters['regex'] = RegexConverter
 
 
-class QueueListView(MethodView):
-    def get(self):
-        return render_template(
-            'queue.html'
-        )
-
-
 class ProjectListView(MethodView):
     def get(self):
         projects = db.session.query(Project).all()
-
-        return render_template(
-            'project_list.html',
-            projects=projects,
-        )
+        return jsonify({
+            'projects': projects,
+        })
 
 
 class ProjectSprintListView(MethodView):
@@ -185,12 +198,11 @@ class ProjectSprintListView(MethodView):
         # FIXME - this can raise an error
         sprints = db.session.query(Sprint).filter_by(
             project_id=project.id).all()
-        return render_template(
-            'sprint_list.html',
-            # FIXME - hard-coded
-            project=project,
-            sprints=sprints,
-        )
+
+        return jsonify({
+            'project': project,
+            'sprints': sprints
+        })
 
 
 class ProjectSprintView(MethodView):
@@ -199,7 +211,8 @@ class ProjectSprintView(MethodView):
         project = db.session.query(Project).filter_by(slug=projectslug).one()
 
         # FIXME - this can raise an error
-        sprint = db.session.query(Sprint).filter_by(project_id=project.id, slug=sprintslug).one()
+        sprint = (db.session.query(Sprint)
+                  .filter_by(project_id=project.id, slug=sprintslug).one())
 
         token = request.cookies.get('token')
         changed_after = request.args.get('since')
@@ -280,16 +293,15 @@ class ProjectSprintView(MethodView):
             bug.get('priority') if bug.get('priority') != '--' else 'P6')
         )
 
-        return render_template(
-            'sprint.html',
-            sprint=sprint,
-            latest_change_time=latest_change_time,
-            bugs=bugs,
-            total_points=total_points,
-            closed_points=closed_points,
-            bugs_with_no_points=bugs_with_no_points,
-            last_load=datetime.datetime.now(),
-        )
+        return jsonify({
+            'project': project,
+            'sprint': sprint,
+            'latest_change_time': latest_change_time,
+            'bugs': bugs,
+            'total_points': total_points,
+            'closed_points': closed_points,
+            'bugs_with_no_points': bugs_with_no_points,
+        })
 
 
 class LogoutView(MethodView):
@@ -305,9 +317,6 @@ class LogoutView(MethodView):
 
 
 class LoginView(MethodView):
-    def get(self):
-        return render_template('index.html')
-
     def post(self):
         json_data = request.get_json(force=True)
         login_payload = {
@@ -341,6 +350,17 @@ class LoginView(MethodView):
             return response
 
 
+@app.route('/')
+@app.route('/<start>')
+@app.route('/<start>/<path:path>')
+def static_stuff(start=None, path=None):
+    """Handles static files and falls back to serving the Angular homepage."""
+    if start in ['css', 'img', 'js', 'font', 'partials']:
+        return send_file('static/%s/%s' % (start, path))
+    else:
+        return send_file('static/index.html')
+
+
 # FIXME - we don't use this so far. it allows you to do bugzilla api
 # calls from javascript, but it seems to use urlencoded data, so I
 # don't know what to do with this.
@@ -357,22 +377,12 @@ def favicon():
         mimetype='image/vnd.microsoft.icon')
 
 
-# Handles all static files
-@app.route('/<regex("css|img|js|font"):start>/<path:path>')
-def static_stuff(start, path):
-    return send_file('static/%s/%s' % (start, path))
-
-
-@app.route('/')
-def index():
-    return render_template('index.html')
-
-
 app.add_url_rule('/api/project/<projectslug>/<sprintslug>',
                  view_func=ProjectSprintView.as_view('project-sprint'))
 app.add_url_rule('/api/project/<projectslug>',
                  view_func=ProjectSprintListView.as_view('project-sprint-list'))
-app.add_url_rule('/api/project', view_func=ProjectListView.as_view('project-list'))
+app.add_url_rule('/api/project',
+                 view_func=ProjectListView.as_view('project-list'))
 app.add_url_rule('/api/logout', view_func=LogoutView.as_view('logout'))
 app.add_url_rule('/api/login', view_func=LoginView.as_view('login'))
 

@@ -1,9 +1,5 @@
 /* TODO: Put ernest css stuff here. */
 
-#login-form {
-    display: none;
-}
-
 #login-field, #password-field {
     width: 10em;
 }
@@ -29,4 +25,43 @@ tr.bug-row-resolved td {
 
 tr.bug-row-verified td {
     text-decoration: line-through;
+}
+
+.loading {
+    position: absolute;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    background-color: #000;
+    -webkit-animation: spin 1s infinite linear;
+    animation: spin 1s infinite linear;
+    transition: opacity 0.2s;
+}
+
+.loading.transparent {
+    opacity: 0;
+}
+
+@keyframes spin {
+    0% {
+        -webkit-transform: rotate(0);
+        transform: rotate(0);
+    }
+
+    100% {
+        -webkit-transform: rotate(360);
+        transform: rotate(360deg);
+    }
+}
+
+@-webkit-keyframes spin {
+    0% {
+        -webkit-transform: rotate(0);
+        transform: rotate(0);
+    }
+
+    100% {
+        -webkit-transform: rotate(360deg);
+        transform: rotate(360deg);
+    }
 }

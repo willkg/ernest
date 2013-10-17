@@ -15,10 +15,10 @@
     <div class="span6">
       <dl class="dl-horizontal">
         <dt>Last refresh</dt>
-        <dd>{{last_load|date:"M-d-yyyy H:m"}}</dd>
+        <dd>{{last_load|date:"M-d-yyyy H:mm"}}</dd>
 
         <dt>Last bug change</dt>
-        <dd>{{latest_change_time|date:"M-d-yyyy H:m"}}</dd>
+        <dd>{{latest_change_time|date:"M-d-yyyy H:mm"}}</dd>
 
       </dl>
     </div>
@@ -67,7 +67,7 @@
 
       </td>
       <td>{{bug.assigned_to.real_name}}</td>
-      <td>{{bug.last_change_time|date:"M-d-yyyy H:m"}}</td>
+      <td>{{bug.last_change_time|date:"M-d-yyyy H:mm"}}</td>
       <td>{{bug.status}}</td>
       <td>{{bug.points}}</td>
     </tr>

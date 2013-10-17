@@ -17,28 +17,7 @@
           <li class="pull-left"><a href="/projects">Projects</a></li>
         </ul>
 
-        <ul class="nav pull-right">
-          <span ng-show="loggedIn()">
-            <li><p class="navbar-text">{{ request.cookies.username }}</p></li>
-            <li><a id="logout-link" href="#" ng-click="doLogout()">Logout</a></li>
-          </span>
-          <span ng-show="!loggedIn()">
-            <li>
-              <div id="login-form">
-                <input class="login-form" type="text" ng-model="bz_username"
-                       placeholder="Bugzilla login"/>
-
-                <input class="login-form" type="password" ng-model="bz_password"
-                       placeholder="Bugzilla password"/>
-
-                <button id="login-submit" class="btn btn-primary login-form" ng-click="doLogin()">
-                  Submit
-                </button>
-              </div>
-              <a id="login-link" href="#">Login</a>
-            </li>
-          </span>
-        </ul>
+        <ul class="nav pull-right" ng-include="'/partials/auth.html'" ng-controller="AuthCtrl"></ul>
       </div>
     </div>
 

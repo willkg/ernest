@@ -1,0 +1,21 @@
+<!-- This is included in the nav bar inside a <ul>, and controlled by AuthCtrl !-->
+
+<li ng-show="loggedIn()">
+  <p class="navbar-text">{{ creds.login }}</p>
+</li>
+<li ng-show="loggedIn()">
+  <a id="logout-link" href="#" ng-click="logout()">Logout</a>
+</li>
+
+<li ng-hide="loggedIn()">
+  <ng-form ng-show="loggingIn">
+    <input class="login-form" type="text" ng-model="creds.login" placeholder="Bugzilla login"/>
+    <input class="login-form" type="password" ng-model="creds.password" placeholder="Bugzilla password"/>
+
+    <button id="login-submit" class="btn btn-primary login-form" ng-click="login()">
+      Submit
+    </button>
+  </ng-form>
+
+  <a id="login-link" href="#" ng-click="loggingIn = true" ng-hide="loggingIn">Login</a>
+</li>

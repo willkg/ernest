@@ -106,6 +106,7 @@ Helpful documentation
 * SQLAlchemy: http://www.sqlalchemy.org/
 * Flask-SQLAlchemy: http://pythonhosted.org/Flask-SQLAlchemy/index.html
 * Alembic: https://alembic.readthedocs.org/en/latest/index.html
+* Angular: http://angularjs.org/
 
 
 Locations of things

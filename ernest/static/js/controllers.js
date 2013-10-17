@@ -5,7 +5,7 @@
 
 var ernestControllers = angular.module('ernest.controllers', []);
 
-ernestControllers.controller('HomeCtrl', [function() {}])
+ernestControllers.controller('HomeCtrl', [function() {}]);
 
 ernestControllers.controller('ProjectListCtrl', ['$rootScope', '$scope', 'Api',
     function($rootScope, $scope, Api) {
@@ -17,12 +17,12 @@ ernestControllers.controller('ProjectListCtrl', ['$rootScope', '$scope', 'Api',
             $rootScope.loading--;
         });
     }
-])
+]);
 
 ernestControllers.controller('ProjectDetailCtrl', ['$rootScope', '$scope', '$routeParams', 'Api',
     function($rootScope, $scope, $routeParams, Api) {
         $rootScope.loading++;
-        
+
         Api.get($routeParams).$promise.then(function(data) {
             $scope.project = data.project;
             $scope.sprints = data.sprints;
@@ -30,12 +30,23 @@ ernestControllers.controller('ProjectDetailCtrl', ['$rootScope', '$scope', '$rou
             $rootScope.loading--;
         });
     }
-])
+]);
 
 ernestControllers.controller('SprintDetailCtrl', ['$rootScope', '$scope', '$routeParams', 'Api',
     function($rootScope, $scope, $routeParams, Api) {
         $rootScope.loading++;
         
+        $scope.bugSortBy = {key: 'priority', reverse: false};
+        $scope.bugSort = function(bug) {
+            var val = bug[$scope.bugSortBy.key];
+            if ($scope.bugSortBy.key === 'priority' && val == '--') {
+                val = 'P6';
+            } else if ($scope.bugSortBy.key === 'assigned_to') {
+                val = val.real_name;
+            }
+            return val;
+        };
+
         Api.get($routeParams).$promise.then(function(data) {
             $scope.bugs = data.bugs;
             $scope.bugs_with_no_points = data.bugs_with_no_points;
@@ -67,10 +78,6 @@ ernestControllers.controller('AuthCtrl', ['$scope', '$cookies', '$http',
 
         if ($cookies.username) {
             $scope.creds.login = $cookies.username;
-        }
-
-        $scope.startLogin = function() {
-            $scope.loggingIn = true;
         }
 
         $scope.login = function() {

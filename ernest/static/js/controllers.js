@@ -32,14 +32,13 @@ ernestControllers.controller('ProjectDetailCtrl', ['$rootScope', '$scope', '$rou
     }
 ]);
 
-ernestControllers.controller('SprintDetailCtrl', ['$rootScope', '$scope', '$routeParams', 'Api',
-    function($rootScope, $scope, $routeParams, Api) {
-        $rootScope.loading++;
-        
+ernestControllers.controller('SprintDetailCtrl', ['$rootScope', '$scope', '$routeParams', '$cacheFactory', '$interval', 'Api',
+    function($rootScope, $scope, $routeParams, $cacheFactory, $interval, Api) {
+
         $scope.bugSortBy = {key: 'priority', reverse: false};
         $scope.bugSort = function(bug) {
             var val = bug[$scope.bugSortBy.key];
-            if ($scope.bugSortBy.key === 'priority' && val == '--') {
+            if ($scope.bugSortBy.key === 'priority' && val === '--') {
                 val = 'P6';
             } else if ($scope.bugSortBy.key === 'assigned_to') {
                 val = val.real_name;
@@ -47,27 +46,62 @@ ernestControllers.controller('SprintDetailCtrl', ['$rootScope', '$scope', '$rout
             return val;
         };
 
-        Api.get($routeParams).$promise.then(function(data) {
-            $scope.bugs = data.bugs;
-            $scope.bugs_with_no_points = data.bugs_with_no_points;
-            $scope.latest_change_time = data.latest_change_time;
-            $scope.sprint = data.sprint;
-            $scope.total_points = data.total_points;
-            $scope.closed_points = data.closed_points;
-            $scope.last_load = new Date();
+        $scope.refresh = {
+            auto: false,
+            time: 30 * 60 * 1000,  // 30 minutes
 
-            $rootScope.loading--;
-
-            if ($scope.bugs_with_no_points > 0) {
-                $scope.completionState = 'notready';
-            } else if ($scope.closed_points === $scope.total_points) {
-                $scope.completionState = 'done';
-            } else if ($scope.closed_points > $scope.total_points / 2) {
-                $scope.completionState = 'almost';
-            } else {
-                $scope.completionState = 'incomplete';
+            now: function() {
+                var sprint = $scope.sprint;
+                var proj = sprint.project;
+                if (!sprint || !proj) {
+                    return;
+                }
+                var url = '/api/project/' + proj.slug + '/' + sprint.slug;
+                $cacheFactory.get('$http').remove(url);
+                return getData();
             }
-        });
+        };
+
+        var autoRefreshPromise;
+        $scope.$watch('refresh.auto', function(newVal) {
+            if (newVal === true) {
+                // Enable auto refresh.
+                autoRefreshPromise = $interval($scope.refresh.now, $scope.refresh.time);
+                $scope.refresh.now();
+            } else if (!!autoRefreshPromise) {
+                // Stop auto refresh.
+                $interval.cancel(autoRefreshPromise);
+            }
+        }, false);
+
+        function getData() {
+            $rootScope.loading++;
+
+            var p = Api.get($routeParams).$promise.then(function(data) {
+                $rootScope.loading--;
+
+                $scope.bugs = data.bugs;
+                $scope.bugs_with_no_points = data.bugs_with_no_points;
+                $scope.latest_change_time = data.latest_change_time;
+                $scope.sprint = data.sprint;
+                $scope.total_points = data.total_points;
+                $scope.closed_points = data.closed_points;
+                $scope.last_load = new Date();
+
+                if ($scope.bugs_with_no_points > 0) {
+                    $scope.completionState = 'notready';
+                } else if ($scope.closed_points === $scope.total_points) {
+                    $scope.completionState = 'done';
+                } else if ($scope.closed_points > $scope.total_points / 2) {
+                    $scope.completionState = 'almost';
+                } else {
+                    $scope.completionState = 'incomplete';
+                }
+            });
+            return p;
+        }
+
+        getData();
     }
 ]);
 

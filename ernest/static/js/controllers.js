@@ -74,6 +74,9 @@ ernestControllers.controller('SprintDetailCtrl', ['$rootScope', '$scope', '$rout
             }
         }, false);
 
+        $scope.$on('login', $scope.refresh.now);
+        $scope.$on('logout', $scope.refresh.now);
+
         function getData() {
             $rootScope.loading++;
 
@@ -105,8 +108,8 @@ ernestControllers.controller('SprintDetailCtrl', ['$rootScope', '$scope', '$rout
     }
 ]);
 
-ernestControllers.controller('AuthCtrl', ['$scope', '$cookies', '$http',
-    function($scope, $cookies, $http) {
+ernestControllers.controller('AuthCtrl', ['$rootScope', '$scope', '$cookies', '$http',
+    function($rootScope, $scope, $cookies, $http) {
         $scope.creds = {login: '', password: ''};
         $scope.loggingIn = false;
 
@@ -119,6 +122,7 @@ ernestControllers.controller('AuthCtrl', ['$scope', '$cookies', '$http',
             $http.post('/api/login', $scope.creds)
                 .success(function(err) {
                     $scope.creds.password = null;
+                    $rootScope.$broadcast('login', $scope.creds.login);
                 })
                 .error(function(err) {
                     console.log(err);
@@ -126,7 +130,10 @@ ernestControllers.controller('AuthCtrl', ['$scope', '$cookies', '$http',
         };
 
         $scope.logout = function() {
-            $http.post('/api/logout');
+            $http.post('/api/logout')
+                .success(function() {
+                    $rootScope.$broadcast('logout');
+                });
         };
 
         $scope.loggedIn = function() {

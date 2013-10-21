@@ -39,11 +39,7 @@
 
     <div class="span2">
       <ng-form>
-        <button ng-click="refresh.now()">Refresh now</button>
-        <label title="Automatically refresh every {{ refresh.time / 60 / 1000 }} minutes.">
-          <input type="checkbox" ng-model="refresh.auto">
-          Auto
-        </label>
+        <button ng-click="refresh()">Refresh now</button>
       </ng-form>
     </div>
   </div>

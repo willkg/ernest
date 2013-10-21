@@ -32,8 +32,8 @@ ernestControllers.controller('ProjectDetailCtrl', ['$rootScope', '$scope', '$rou
     }
 ]);
 
-ernestControllers.controller('SprintDetailCtrl', ['$rootScope', '$scope', '$routeParams', '$cacheFactory', '$interval', 'Api',
-    function($rootScope, $scope, $routeParams, $cacheFactory, $interval, Api) {
+ernestControllers.controller('SprintDetailCtrl', ['$rootScope', '$scope', '$routeParams', '$cacheFactory', 'Api',
+    function($rootScope, $scope, $routeParams, $cacheFactory, Api) {
 
         $scope.bugSortBy = {key: 'priority', reverse: false};
         $scope.bugSort = function(bug) {
@@ -46,36 +46,19 @@ ernestControllers.controller('SprintDetailCtrl', ['$rootScope', '$scope', '$rout
             return val;
         };
 
-        $scope.refresh = {
-            auto: false,
-            time: 30 * 60 * 1000,  // 30 minutes
-
-            now: function() {
-                var sprint = $scope.sprint;
-                var proj = sprint.project;
-                if (!sprint || !proj) {
-                    return;
-                }
-                var url = '/api/project/' + proj.slug + '/' + sprint.slug;
-                $cacheFactory.get('$http').remove(url);
-                return getData();
+        $scope.refresh = function() {
+            var sprint = $scope.sprint;
+            var proj = sprint.project;
+            if (!sprint || !proj) {
+                return;
             }
+            var url = '/api/project/' + proj.slug + '/' + sprint.slug;
+            $cacheFactory.get('$http').remove(url);
+            return getData();
         };
 
-        var autoRefreshPromise;
-        $scope.$watch('refresh.auto', function(newVal) {
-            if (newVal === true) {
-                // Enable auto refresh.
-                autoRefreshPromise = $interval($scope.refresh.now, $scope.refresh.time);
-                $scope.refresh.now();
-            } else if (!!autoRefreshPromise) {
-                // Stop auto refresh.
-                $interval.cancel(autoRefreshPromise);
-            }
-        }, false);
-
-        $scope.$on('login', $scope.refresh.now);
-        $scope.$on('logout', $scope.refresh.now);
+        $scope.$on('login', $scope.refresh);
+        $scope.$on('logout', $scope.refresh);
 
         function getData() {
             $rootScope.loading++;

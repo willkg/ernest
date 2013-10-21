@@ -77,7 +77,8 @@ ernestControllers.controller('AuthCtrl', ['$scope', '$cookies', '$http',
         $scope.loggingIn = false;
 
         if ($cookies.username) {
-            $scope.creds.login = $cookies.username;
+            // This has quotes around it, for some reason, remove it.
+            $scope.creds.login = $cookies.username.slice(1, -1);
         }
 
         $scope.login = function() {

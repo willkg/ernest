@@ -32,14 +32,13 @@ ernestControllers.controller('ProjectDetailCtrl', ['$rootScope', '$scope', '$rou
     }
 ]);
 
-ernestControllers.controller('SprintDetailCtrl', ['$rootScope', '$scope', '$routeParams', 'Api',
-    function($rootScope, $scope, $routeParams, Api) {
-        $rootScope.loading++;
-        
+ernestControllers.controller('SprintDetailCtrl', ['$rootScope', '$scope', '$routeParams', '$cacheFactory', 'Api',
+    function($rootScope, $scope, $routeParams, $cacheFactory, Api) {
+
         $scope.bugSortBy = {key: 'priority', reverse: false};
         $scope.bugSort = function(bug) {
             var val = bug[$scope.bugSortBy.key];
-            if ($scope.bugSortBy.key === 'priority' && val == '--') {
+            if ($scope.bugSortBy.key === 'priority' && val === '--') {
                 val = 'P6';
             } else if ($scope.bugSortBy.key === 'assigned_to') {
                 val = val.real_name;
@@ -47,43 +46,66 @@ ernestControllers.controller('SprintDetailCtrl', ['$rootScope', '$scope', '$rout
             return val;
         };
 
-        Api.get($routeParams).$promise.then(function(data) {
-            $scope.bugs = data.bugs;
-            $scope.bugs_with_no_points = data.bugs_with_no_points;
-            $scope.latest_change_time = data.latest_change_time;
-            $scope.sprint = data.sprint;
-            $scope.total_points = data.total_points;
-            $scope.closed_points = data.closed_points;
-            $scope.last_load = new Date();
-
-            $rootScope.loading--;
-
-            if ($scope.bugs_with_no_points > 0) {
-                $scope.completionState = 'notready';
-            } else if ($scope.closed_points === $scope.total_points) {
-                $scope.completionState = 'done';
-            } else if ($scope.closed_points > $scope.total_points / 2) {
-                $scope.completionState = 'almost';
-            } else {
-                $scope.completionState = 'incomplete';
+        $scope.refresh = function() {
+            var sprint = $scope.sprint;
+            var proj = sprint.project;
+            if (!sprint || !proj) {
+                return;
             }
-        });
+            var url = '/api/project/' + proj.slug + '/' + sprint.slug;
+            $cacheFactory.get('$http').remove(url);
+            return getData();
+        };
+
+        $scope.$on('login', $scope.refresh);
+        $scope.$on('logout', $scope.refresh);
+
+        function getData() {
+            $rootScope.loading++;
+
+            var p = Api.get($routeParams).$promise.then(function(data) {
+                $rootScope.loading--;
+
+                $scope.bugs = data.bugs;
+                $scope.bugs_with_no_points = data.bugs_with_no_points;
+                $scope.latest_change_time = data.latest_change_time;
+                $scope.sprint = data.sprint;
+                $scope.total_points = data.total_points;
+                $scope.closed_points = data.closed_points;
+                $scope.last_load = new Date();
+
+                if ($scope.bugs_with_no_points > 0) {
+                    $scope.completionState = 'notready';
+                } else if ($scope.closed_points === $scope.total_points) {
+                    $scope.completionState = 'done';
+                } else if ($scope.closed_points > $scope.total_points / 2) {
+                    $scope.completionState = 'almost';
+                } else {
+                    $scope.completionState = 'incomplete';
+                }
+            });
+            return p;
+        }
+
+        getData();
     }
 ]);
 
-ernestControllers.controller('AuthCtrl', ['$scope', '$cookies', '$http',
-    function($scope, $cookies, $http) {
+ernestControllers.controller('AuthCtrl', ['$rootScope', '$scope', '$cookies', '$http',
+    function($rootScope, $scope, $cookies, $http) {
         $scope.creds = {login: '', password: ''};
         $scope.loggingIn = false;
 
         if ($cookies.username) {
-            $scope.creds.login = $cookies.username;
+            // This has quotes around it, for some reason, remove it.
+            $scope.creds.login = $cookies.username.slice(1, -1);
         }
 
         $scope.login = function() {
             $http.post('/api/login', $scope.creds)
                 .success(function(err) {
                     $scope.creds.password = null;
+                    $rootScope.$broadcast('login', $scope.creds.login);
                 })
                 .error(function(err) {
                     console.log(err);
@@ -91,7 +113,10 @@ ernestControllers.controller('AuthCtrl', ['$scope', '$cookies', '$http',
         };
 
         $scope.logout = function() {
-            $http.post('/api/logout');
+            $http.post('/api/logout')
+                .success(function() {
+                    $rootScope.$broadcast('logout');
+                });
         };
 
         $scope.loggedIn = function() {

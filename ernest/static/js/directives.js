@@ -2,9 +2,9 @@
 
 /* Directives */
 
-var ernestDirectives = angular.module('ernest.directives', []);
+var ernest = angular.module('ernest');
 
-ernestDirectives.directive('appVersion', ['version',
+ernest.directive('appVersion', ['version',
   function(version) {
     return function(scope, elm, attrs) {
       elm.text(version);
@@ -13,7 +13,7 @@ ernestDirectives.directive('appVersion', ['version',
 ]);
 
 
-ernestDirectives.directive('sortToggle', function() {
+ernest.directive('sortToggle', function() {
   return {
     restrict: 'E',
     replace: true,
@@ -42,7 +42,7 @@ ernestDirectives.directive('sortToggle', function() {
           return $scope.name.reverse ? -1 : 1;
         }
         return 0;
-      }
+      };
     }
   };
 });

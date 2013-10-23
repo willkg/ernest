@@ -1,11 +1,11 @@
 /* Services */
 
-var ernestServices = angular.module('ernest.services', []);
+var ernest = angular.module('ernest');
 
 // To do: this should pull from the server.
-ernestServices.value('version', '0.1a1');
+ernest.value('version', '0.1a1');
 
-ernestServices.factory('Api', ['$resource',
+ernest.factory('Api', ['$resource',
     function($resource) {
 
         function parseJSON(data, headersGetter) {

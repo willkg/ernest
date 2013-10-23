@@ -27,21 +27,24 @@ Install and configure
 
 2. ``pip install -r requirements.txt``
 
-3. ``cp ernest/setting_local.py-dist ernest/settings_local.py``
+3. (optional) ``npm install`` if you want to run the JS tests.
 
-4. Edit ``ernest/settings_local.py``.
+4. ``cp ernest/setting_local.py-dist ernest/settings_local.py``
+
+5. Edit ``ernest/settings_local.py``.
 
    You can see which settings are editable/overrideable in
    ``ernest/settings.py``.
 
-5. Create the database and give it the alembic stamp::
+6. Create the database and give it the alembic stamp::
 
        $ python manage.py db_create
 
    This creates the database based on the settings in
    ``ernest/settings_local.py``.
 
-6. Install and run memcached.
+7. Install and run memcached.
+
 
 
 Create projects and sprints
@@ -67,9 +70,13 @@ Run::
 Run tests
 =========
 
-Run tests with::
+Run the python tests with::
 
     $ nosetests
+
+Run the clientside tests with::
+
+    $ karma start karma.conf.js --single-run
 
 
 Manage db and migrations
@@ -173,7 +180,7 @@ Locations of things
 Project settings:
     ``ernest/settings.py`` and ``ernest/settings_local.py-dist``
 
-View code:
+API View code:
     ``ernest/main.py``
 
 Database models:

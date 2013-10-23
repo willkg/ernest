@@ -6,10 +6,6 @@ var ernest = angular.module('ernest', [
     'ngRoute',
     'ngResource',
     'ngCookies',
-    'ernest.filters',
-    'ernest.services',
-    'ernest.directives',
-    'ernest.controllers'
 ]);
 
 ernest.config(['$routeProvider', '$locationProvider',
@@ -35,12 +31,5 @@ ernest.config(['$routeProvider', '$locationProvider',
         $routeProvider.otherwise({
             redirectTo: '/'
         });
-    }
-]);
-
-ernest.run(['$rootScope', '$http', '$cookies',
-    function($rootScope, $http, $cookies) {
-        $rootScope.loading = 0;
-
     }
 ]);

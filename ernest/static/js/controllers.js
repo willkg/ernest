@@ -3,37 +3,38 @@
 /* Controllers */
 
 
-var ernestControllers = angular.module('ernest.controllers', []);
+var ernest = angular.module('ernest');
 
-ernestControllers.controller('HomeCtrl', [function() {}]);
+ernest.controller('HomeCtrl', [function() {}]);
 
-ernestControllers.controller('ProjectListCtrl', ['$rootScope', '$scope', 'Api',
-    function($rootScope, $scope, Api) {
-        $rootScope.loading++;
+ernest.controller('ProjectListCtrl', ['$scope', 'Api',
+    function($scope, Api) {
+        $scope.$emit('loading+');
+        $scope.projects = [];
 
         Api.query().$promise.then(function(data) {
             $scope.projects = data.projects;
 
-            $rootScope.loading--;
+            $scope.$emit('loading-');
         });
     }
 ]);
 
-ernestControllers.controller('ProjectDetailCtrl', ['$rootScope', '$scope', '$routeParams', 'Api',
-    function($rootScope, $scope, $routeParams, Api) {
-        $rootScope.loading++;
+ernest.controller('ProjectDetailCtrl', ['$scope', '$routeParams', 'Api',
+    function($scope, $routeParams, Api) {
+        $scope.$emit('loading+');
 
         Api.get($routeParams).$promise.then(function(data) {
             $scope.project = data.project;
             $scope.sprints = data.sprints;
 
-            $rootScope.loading--;
+            $scope.$emit('loading-');
         });
     }
 ]);
 
-ernestControllers.controller('SprintDetailCtrl', ['$rootScope', '$scope', '$routeParams', '$cacheFactory', 'Api',
-    function($rootScope, $scope, $routeParams, $cacheFactory, Api) {
+ernest.controller('SprintDetailCtrl', ['$scope', '$routeParams', '$cacheFactory', 'Api',
+    function($scope, $routeParams, $cacheFactory, Api) {
 
         $scope.bugSortBy = {key: 'priority', reverse: false};
         $scope.bugSort = function(bug) {
@@ -57,14 +58,14 @@ ernestControllers.controller('SprintDetailCtrl', ['$rootScope', '$scope', '$rout
             return getData();
         };
 
-        $scope.$on('login', $scope.refresh);
-        $scope.$on('logout', $scope.refresh);
+        $scope.$on('login', function() { $scope.refresh(); });
+        $scope.$on('logout', function() { $scope.refresh(); });
 
         function getData() {
-            $rootScope.loading++;
+            $scope.$emit('loading+');
 
             var p = Api.get($routeParams).$promise.then(function(data) {
-                $rootScope.loading--;
+                $scope.$emit('loading-');
 
                 $scope.bugs = data.bugs;
                 $scope.bugs_with_no_points = data.bugs_with_no_points;
@@ -96,7 +97,7 @@ ernestControllers.controller('SprintDetailCtrl', ['$rootScope', '$scope', '$rout
     }
 ]);
 
-ernestControllers.controller('AuthCtrl', ['$rootScope', '$scope', '$cookies', '$http',
+ernest.controller('AuthCtrl', ['$rootScope', '$scope', '$cookies', '$http',
     function($rootScope, $scope, $cookies, $http) {
         $scope.creds = {login: '', password: ''};
         $scope.loggingIn = false;
@@ -127,5 +128,21 @@ ernestControllers.controller('AuthCtrl', ['$rootScope', '$scope', '$cookies', '$
         $scope.loggedIn = function() {
             return !!$cookies.username;
         };
+    }
+]);
+
+ernest.controller('LoadingCtrl', ['$rootScope', '$scope',
+    function($rootScope, $scope) {
+        $scope.loading = 0;
+
+        $rootScope.$on('loading+', function() {
+            $scope.loading++;
+        });
+        $rootScope.$on('loading-', function() {
+            $scope.loading--;
+            if ($scope.loading < 0) {
+                throw Error('More loading- events than loading+ events.');
+            }
+        });
     }
 ]);

@@ -25,15 +25,16 @@
 
     <div class="span5">
       <dl class="dl-horizontal">
-        <span ng-show="bugs_with_no_points">
-          <dt class="text-error">Bugs with no points</dt>
-          <dd class="text-error">{{ bugs_with_no_points }}</dd>
-          </span>
-        <dt>Total points</dt>
-        <dd>{{ total_points }}</dd>
+        <dt>Bugs completed</dt>
+        <dd>{{ closed_bugs }} / {{ total_bugs }}</dd>
 
         <dt>Points completed</dt>
         <dd>{{ closed_points }} / {{ total_points }}</dd>
+
+        <span ng-show="bugs_with_no_points">
+          <dt class="text-error">Bugs with no points</dt>
+          <dd class="text-error">{{ bugs_with_no_points }}</dd>
+        </span>
       </dl>
     </div>
 
@@ -105,4 +106,22 @@
     </tr>
 
   </table>
+
+  <h2>Sprint stats</h2>
+
+  <h3>Priority breakdown</h3>
+  <table class="table-striped table-condensed">
+    <tr ng-repeat="pri in priority_breakdown">
+      <td>{{pri.priority}}</td>
+      <td>{{pri.count}}</td>
+    </tr>
+  </table>
+
+  <h3>Points breakdown</h3>
+  <p>TODO</p>
+
+  <h3>Component breakdown</h3>
+  <p>TODO</p>
+
+  <h3>
 </div>

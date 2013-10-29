@@ -247,9 +247,13 @@ class ProjectSprintView(MethodView):
         )
 
         bugs = bz.mark_is_blocked(bug_data['bugs'], token)
+        total_bugs = len(bugs)
+        closed_bugs = 0
         total_points = 0
         closed_points = 0
         bugs_with_no_points = 0
+
+        priority_breakdown = {}
 
         for bug in bugs:
             bug['needinfo'] = []
@@ -288,7 +292,9 @@ class ProjectSprintView(MethodView):
                 total_points += bug['points']
                 if bug['status'].lower() in ('resolved', 'verified'):
                     closed_points += bug['points']
+                    closed_bugs += 1
 
+            priority_breakdown[bug['priority']] = priority_breakdown.get(bug['priority'], 0) + 1
             bug['whiteboardflags'] = wb_data['flags']
 
         # FIXME - this fails if there's no bug data
@@ -303,14 +309,23 @@ class ProjectSprintView(MethodView):
             bug.get('priority') if bug.get('priority') != '--' else 'P6')
         )
 
+        # Convert this to a sorted list of dicts because Angular is Angular.
+        priority_breakdown = [
+            {'priority': key, 'count': priority_breakdown[key]}
+            for key in sorted(priority_breakdown.keys(),
+                              key=lambda p: p if p != '--' else 'P6')]
+
         return jsonify({
             'project': project,
             'sprint': sprint,
             'latest_change_time': latest_change_time,
             'bugs': bugs,
+            'total_bugs': total_bugs,
+            'closed_bugs': closed_bugs,
             'total_points': total_points,
             'closed_points': closed_points,
             'bugs_with_no_points': bugs_with_no_points,
+            'priority_breakdown': priority_breakdown,
         })
 
 

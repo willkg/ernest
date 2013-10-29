@@ -70,8 +70,11 @@ ernestControllers.controller('SprintDetailCtrl', ['$rootScope', '$scope', '$rout
                 $scope.bugs_with_no_points = data.bugs_with_no_points;
                 $scope.latest_change_time = data.latest_change_time;
                 $scope.sprint = data.sprint;
+                $scope.total_bugs = data.total_bugs;
+                $scope.closed_bugs = data.closed_bugs;
                 $scope.total_points = data.total_points;
                 $scope.closed_points = data.closed_points;
+                $scope.priority_breakdown = data.priority_breakdown;
                 $scope.last_load = new Date();
 
                 if ($scope.bugs_with_no_points > 0) {

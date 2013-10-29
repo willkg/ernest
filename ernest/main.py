@@ -10,6 +10,7 @@ from flask import (Flask, request, make_response, abort, jsonify,
 from flask.views import MethodView
 from flask.ext.sqlalchemy import SQLAlchemy
 
+from flask_sslify import SSLify
 from werkzeug.routing import BaseConverter
 
 from .bugzilla import BugzillaTracker
@@ -39,6 +40,9 @@ if os.environ.get(settings_key):
 else:
     from ernest import settings
     app.config.from_object(settings)
+
+# SSLify
+sslify = SSLify(app)
 
 # Register error handlers
 from ernest.errors import register_error_handlers

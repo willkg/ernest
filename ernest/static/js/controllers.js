@@ -69,7 +69,9 @@ ernestControllers.controller('SprintDetailCtrl', ['$rootScope', '$scope', '$rout
                 $scope.bugs = data.bugs;
                 $scope.bugs_with_no_points = data.bugs_with_no_points;
                 $scope.latest_change_time = data.latest_change_time;
+                $scope.prev_sprint = data.prev_sprint;
                 $scope.sprint = data.sprint;
+                $scope.next_sprint = data.next_sprint;
                 $scope.total_bugs = data.total_bugs;
                 $scope.closed_bugs = data.closed_bugs;
                 $scope.total_points = data.total_points;

@@ -51,8 +51,14 @@ ernestServices.factory('Api', ['$resource',
             if (data.sprints) {
                 data.sprints = data.sprints.map(augmentSprint.bind(null, data.project));
             }
+            if (data.prev_sprint) {
+                data.prev_sprint = augmentSprint(data.project, data.prev_sprint);
+            }
             if (data.sprint) {
                 data.sprint = augmentSprint(data.project, data.sprint);
+            }
+            if (data.next_sprint) {
+                data.next_sprint = augmentSprint(data.project, data.next_sprint);
             }
             if (data.bugs) {
                 data.bugs = data.bugs.map(augmentBug);

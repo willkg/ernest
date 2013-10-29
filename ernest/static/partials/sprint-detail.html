@@ -1,4 +1,18 @@
 <div id="content">
+  <div class="row">
+    <div class="span6">
+      <span class="pull-left" ng-show="prev_sprint">
+        <a href="{{ prev_sprint.url }}">PREV: {{ prev_sprint.name }}</a>
+      </span>
+    </div>
+
+    <div class="span6">
+      <span class="pull-right" ng-show="next_sprint">
+        <a href="{{ next_sprint.url }}">NEXT: {{ next_sprint.name }}</a>
+      </span>
+    </div>
+  </div>
+
   <h1>
     Sprint: {{sprint.name}}
     <span ng-switch="completionState">

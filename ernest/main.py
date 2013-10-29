@@ -217,6 +217,21 @@ class ProjectSprintView(MethodView):
         # FIXME - this can raise an error
         sprint = (db.session.query(Sprint)
                   .filter_by(project_id=project.id, slug=sprintslug).one())
+        sprints = list((db.session.query(Sprint)
+                        .filter_by(project_id=project.id)
+                        .all()))
+        # FIXME - this sorts sprints on name to figure out prev/next sprints.
+        # The code is gross.
+        sprints.sort(key=lambda spr: spr.name)
+        next_sprint = None
+        prev_sprint = None
+        for i, spr in enumerate(sprints):
+            if spr.id == sprint.id:
+                if i > 0:
+                    prev_sprint = sprints[i-1]
+                if i < len(sprints) - 1:
+                    next_sprint = sprints[i+1]
+                break
 
         token = request.cookies.get('token')
         changed_after = request.args.get('since')
@@ -317,7 +332,9 @@ class ProjectSprintView(MethodView):
 
         return jsonify({
             'project': project,
+            'prev_sprint': prev_sprint,
             'sprint': sprint,
+            'next_sprint': next_sprint,
             'latest_change_time': latest_change_time,
             'bugs': bugs,
             'total_bugs': total_bugs,

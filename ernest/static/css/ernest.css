@@ -12,7 +12,11 @@
 
 .container {
     /* FIXME - srsly. */
-    width: 1200px;
+    width: 1000px;
+}
+
+th {
+    white-space: nowrap;
 }
 
 #bug-table {

@@ -263,7 +263,13 @@ class ProjectSprintView(MethodView):
 
             for flag in bug.get('flags', []):
                 if flag['name'] == 'needinfo':
-                    bug['needinfo'].append(flag['requestee']['name'])
+                    needinfo_requestee = flag['requestee']['name']
+                    if '@' in needinfo_requestee:
+                        needinfo_requestee = needinfo_requestee.split('@')[0]
+                    bug['needinfo'].append({
+                        'username': needinfo_requestee,
+                        'name': flag['requestee']['name']
+                    })
                 # FIXME - are there other flags we're interested in?
 
             for group in bug.get('groups', []):

@@ -72,7 +72,7 @@
         <sort-toggle name="bugSortBy" value="status" />
       </th>
       <th>
-        points
+        pts
         <sort-toggle name="bugSortBy" value="points" />
       </th>
     </tr>
@@ -84,7 +84,10 @@
       <td>
         <span class="label label-important" ng-show="bug.securitygroup">SECURE</span>
         <span class="label label-important" ng-show="bug.confidential">CONFIDENTIAL</span>
-        <span class="label label-warning" ng-show="bug.needinfo">NEEDSINFO</span>
+        <span class="label label-warning" ng-show="bug.needinfo">
+          NEEDSINFO
+          <span ng-repeat="person in bug.needinfo">{{person.username}} </span>
+        </span>
 
         <span class="label label-important" ng-show="bug.is_blocked">
           BLOCKED

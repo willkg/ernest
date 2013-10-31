@@ -29,25 +29,27 @@ ADMIN = []
 # Database
 # ------------------------------------------------
 
-# This is the url to the database.
+# This is the url to the database. Gets set via Flask-Heroku, but
+# if you don't like what that's doing, you can set it explicitly
+# here.
+# Looks at SQLALCHEMY_DATABASE_URI then defaults to sqlite.
 # For a sqlite file-based database, use sqlite:///path/to/db
-SQLALCHEMY_DATABASE_URI = os.environ.get(
-    'SQLALCHEMY_DATABASE_URI',
-    'sqlite:///{0}/ernest_app.db'.format(
-        os.path.join(os.path.dirname(__file__), '..'))
-)
+# SQLALCHEMY_DATABASE_URI = os.environ.get(
+#     'SQLALCHEMY_DATABASE_URI',
+#     'sqlite:///{0}/ernest_app.db'.format(
+#         os.path.join(os.path.dirname(__file__), '..')
+#     )
+# )
 
 
 # ------------------------------------------------
 # Ernest supports several different cache systems.
 # ------------------------------------------------
 
-# Memcache setup
-# MEMCACHE_URL = os.environ.get('MEMCACHE_URL', '127.0.0.1:11211')
-# MEMCACHE_PREFIX = os.environment.get('MEMCACHE_PREFIX', 'ernest:')
-
-# NullCache
-# NULLCACHE = True
+# Ernest uses Flask-Cache.
+# http://pythonhosted.org/Flask-Cache/
+CACHE_KEY_PREFIX = 'ernest:'
+CACHE_TYPE = 'memcached'
 
 
 # This imports settings_local.py thus everything in that file

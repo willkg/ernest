@@ -20,6 +20,8 @@ def call_command(cmd, verbose=False):
 @manager.command
 def db_create():
     """Create the tables and do alembic stuff"""
+    print 'db at: {0}'.format(
+        app.config['SQLALCHEMY_DATABASE_URI'])
     try:
         db.engine.execute('select * from project')
         print 'Database already exists with tables.'
@@ -31,7 +33,7 @@ def db_create():
         pass
 
     print 'Creating {0}....'.format(
-        app.config.get('SQLALCHEMY_DATABASE_URI'))
+        app.config['SQLALCHEMY_DATABASE_URI'])
 
     db.create_all()
 

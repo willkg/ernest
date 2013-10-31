@@ -96,6 +96,64 @@ You can see the current migration with::
     $ alembic current
 
 
+Setup on Heroku
+===============
+
+Create the app:
+
+    ::
+
+        # Log in if you haven't already
+        $ heroku login
+
+        # Use the buchner buildpack
+        $ heroku create --stack cedar --buildpack \
+            git://github.com/rehandalal/heroku-buildpack-python.git
+
+        # Push the repository
+        $ git push heroku master
+
+    More details on `Buchner build pack here
+    <https://github.com/rehandalal/heroku-buildpack-buchner>`_.
+
+Create the db:
+
+    ::
+
+        $ heroku config | grep POSTGRESQL
+
+        # Heroku creates a color db and tells you the variable.
+        $ heroku pg:promote <COLOR VAR FROM PREVIOUS OUTPUT>
+
+        # Create db
+        $ heroku run "python manage.py db_create"
+
+    More details on `Postgres on Heroku here
+    <https://devcenter.heroku.com/articles/heroku-postgresql>`_.
+
+
+Create the memcached:
+
+    ::
+
+        # Install memcachier
+        $ heroku addons:add memcachier:dev
+
+
+Create a dyno and make sure it's working:
+
+    ::
+
+        # Create a dyno
+        $ heroku ps:scale web=1
+
+        # Make sure it's working
+        $ heroku ps
+
+        # Open in your browser
+        $ heroku open
+
+
 Helpful documentation
 =====================
 

@@ -4,9 +4,6 @@ DEBUG = True
 # Set this to the uri for your database.
 # SQLALCHEMY_DATABASE_URI = ''
 
-# set this to the url for your memcache.
-# MEMCACHE_URL = ''
-
 # This is the secret key. It's important to set this to something
 # non-trivial and not shared. Set this in your settings_local.py
 # file. DON'T set it in settings.py and DON'T check in the changes to

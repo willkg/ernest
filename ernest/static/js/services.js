@@ -28,7 +28,7 @@ ernestServices.factory('Api', ['$resource',
         }
 
         function augmentBug(bug) {
-            var baseUrl = 'https://bugzilla.mozilla.org/show_bug.cgi?id='
+            var baseUrl = 'https://bugzilla.mozilla.org/show_bug.cgi?id=';
             bug.url = baseUrl + bug.id;
             if (bug.open_blockers) {
                 bug.open_blockers = bug.open_blockers.map(function(bugId) {

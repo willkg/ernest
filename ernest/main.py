@@ -8,13 +8,14 @@ import requests
 from flask import (Flask, request, make_response, abort, jsonify,
                    send_file, json)
 from flask.views import MethodView
+from flask.ext.cache import Cache
+from flask.ext.heroku import Heroku
 from flask.ext.sqlalchemy import SQLAlchemy
 
 from flask_sslify import SSLify
 from werkzeug.routing import BaseConverter
 
 from .bugzilla import BugzillaTracker
-from .cache import build_cache
 from .version import VERSION, VERSION_RAW
 
 
@@ -31,6 +32,7 @@ MONTH = DAY * 30
 # ----------------------------------------
 
 app = Flask(__name__)
+heroku = Heroku(app)
 
 # Handle settings--look at os.environ first
 settings_key = 'ERNEST_SETTINGS'.upper()
@@ -143,7 +145,7 @@ class Sprint(db.Model):
 # Cache stuff
 # ----------------------------------------
 
-app.cache = build_cache(app.config)
+app.cache = Cache(app)
 
 
 def cache_set(key, value, *args, **options):

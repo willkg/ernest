@@ -13,10 +13,6 @@ def build_cache(config):
         MEMCACHE_URL
         MEMCACHE_PREFIX (optional)
 
-    nullcache:
-
-        NULLCACHE
-
     """
     if config.get('MEMCACHE_URL'):
         return MemcachedCache(
@@ -24,7 +20,5 @@ def build_cache(config):
             servers=config.get('MEMCACHE_URL').split(','),
             key_prefix=config.get('MEMCACHE_PREFIX', 'ernest:'))
 
-    if config.get('NULLCACHE'):
-        return NullCache()
-
-    raise CacheConfigError('No cache is configured. See settings.py.')
+    print 'Using NullCache().'
+    return NullCache()

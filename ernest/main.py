@@ -9,7 +9,6 @@ from flask import (Flask, request, make_response, abort, jsonify,
                    send_file, json)
 from flask.views import MethodView
 from flask.ext.cache import Cache
-from flask.ext.heroku import Heroku
 from flask.ext.sqlalchemy import SQLAlchemy
 
 from flask_sslify import SSLify
@@ -32,9 +31,18 @@ MONTH = DAY * 30
 # ----------------------------------------
 
 app = Flask(__name__)
-heroku = Heroku(app)
 
-# Handle settings--look at os.environ first
+# Convert Heroku variables into ones we like
+for new_key, old_key in (('SQLALCHEMY_DATABASE_URI', 'DATABASE_URL'),
+                         ('CACHE_MEMCACHED_USERNAME', 'MEMCACHIER_USERNAME'),
+                         ('CACHE_MEMCACHED_PASSWORD', 'MEMCACHIER_PASSWORD')):
+    app.config.setdefault(new_key, os.environ.get(old_key))
+
+app.config.setdefault(
+    'CACHE_MEMCACHED_SERVERS',
+    os.environ.get('MEMCACHIER_SERVERS', '').split(','))
+
+# Handle settings. These override environment variables.
 settings_key = 'ERNEST_SETTINGS'.upper()
 if os.environ.get(settings_key):
     app.config.from_envvar(settings_key, silent=True)
@@ -144,6 +152,13 @@ class Sprint(db.Model):
 # ----------------------------------------
 # Cache stuff
 # ----------------------------------------
+
+if app.config.get('CACHE_MEMCACHED_SERVERS', None):
+    print 'Using SASLmemcached'
+    app.config['CACHE_TYPE'] = 'saslmemcached'
+else:
+    print 'Using SimpleCache'
+    app.config['CACHE_TYPE'] = 'simple'
 
 app.cache = Cache(app)
 

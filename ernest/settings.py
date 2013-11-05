@@ -29,9 +29,12 @@ ADMIN = []
 # Database
 # ------------------------------------------------
 
-# This is the url to the database. Gets set via Flask-Heroku, but
+# This is the url to the database. If you're using Heroku, then it'll
+# populate this with DATABASE_URL from the environment.
+#
 # if you don't like what that's doing, you can set it explicitly
 # here.
+#
 # Looks at SQLALCHEMY_DATABASE_URI then defaults to sqlite.
 # For a sqlite file-based database, use sqlite:///path/to/db
 # SQLALCHEMY_DATABASE_URI = os.environ.get(
@@ -48,9 +51,23 @@ ADMIN = []
 
 # Ernest uses Flask-Cache.
 # http://pythonhosted.org/Flask-Cache/
-CACHE_KEY_PREFIX = 'ernest:'
-CACHE_TYPE = 'memcached'
 
+# Cache key prefix to differentiate between other things that might be
+# using the same cache.
+CACHE_KEY_PREFIX = 'ernest:'
+
+# Note: If you're using Heroku and Memcachier, these will get pulled
+# from the environment automatically---you don't need to set them
+# manually.
+
+# list of memcached servers
+# CACHE_MEMCACHED_SERVERS = ['127.0.0.1:11211']
+
+# memcached username (if any)
+# CACHE_MEMCACHED_USERNAME = 'joe'
+
+# memcached password (if any)
+# CACHE_MEMCACHED_PASSWORD = 'password'
 
 # This imports settings_local.py thus everything in that file
 # overrides what's in this file.

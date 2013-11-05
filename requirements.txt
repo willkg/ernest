@@ -11,9 +11,6 @@ python-memcached==1.53
 # For better cache api
 flask-cache
 
-# For converting environment vars to heroku vars
-flask-heroku
-
 # For heroku hosting
 gunicorn
 psycopg2

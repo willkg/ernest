@@ -10,4 +10,4 @@ DEBUG = True
 # your repository.
 SECRET_KEY = ''
 
-# TODO: Add settings that devs and admin will need to set here.
+# See ernest/settings.py for other things you can set.

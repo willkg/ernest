@@ -1,0 +1,14 @@
+{
+  "name": "Ernest",
+  "description": "Bugzilla sprinting frontend",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/willkg/ernest.git"
+  },
+  "devDependencies": {
+    "karma-mocha": "0.1.0",
+    "karma": "0.10.2",
+    "karma-chai": "0.0.2",
+    "karma-sinon": "0.0.1"
+  }
+}

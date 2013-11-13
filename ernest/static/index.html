@@ -21,10 +21,9 @@
       </div>
     </div>
 
-    <div class="loading" ng-class="{transparent: loading == 0}"></div>
-    <div ng-view>
-      
-    </div>
+    <div ng-controller="LoadingCtrl" class="loading" ng-class="{transparent: loading == 0}"></div>
+
+    <div ng-view></div>
 
     <div id="footer">
       This is <a href="https://github.com/willkg/ernest">ernest</a>.
@@ -42,7 +41,6 @@
   <script src="/static/js/app.js"></script>
   <script src="/static/js/services.js"></script>
   <script src="/static/js/controllers.js"></script>
-  <script src="/static/js/filters.js"></script>
   <script src="/static/js/directives.js"></script>
 </body>
 </html>

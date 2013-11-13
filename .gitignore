@@ -5,3 +5,4 @@
 .env
 settings_local.py
 docs/_build/
+node_modules/

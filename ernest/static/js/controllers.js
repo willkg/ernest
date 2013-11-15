@@ -78,6 +78,8 @@ ernest.controller('SprintDetailCtrl', ['$scope', '$routeParams', '$cacheFactory'
                 $scope.total_points = data.total_points;
                 $scope.closed_points = data.closed_points;
                 $scope.priority_breakdown = data.priority_breakdown;
+                $scope.points_breakdown = data.points_breakdown;
+                $scope.component_breakdown = data.component_breakdown;
                 $scope.last_load = new Date();
 
                 if ($scope.bugs_with_no_points > 0) {

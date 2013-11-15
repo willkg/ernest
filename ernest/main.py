@@ -286,6 +286,8 @@ class ProjectSprintView(MethodView):
         bugs_with_no_points = 0
 
         priority_breakdown = {}
+        points_breakdown = {}
+        component_breakdown = {}
 
         for bug in bugs:
             bug['needinfo'] = []
@@ -317,6 +319,7 @@ class ProjectSprintView(MethodView):
             # Pick out whiteboard data
             wb_data = bz.parse_whiteboard(bug['whiteboard'])
             bug['points'] = wb_data.get('p', None)
+            bug['component'] = wb_data.get('c', None)
 
             if bug['points'] is None:
                 bugs_with_no_points += 1
@@ -327,6 +330,9 @@ class ProjectSprintView(MethodView):
                     closed_bugs += 1
 
             priority_breakdown[bug['priority']] = priority_breakdown.get(bug['priority'], 0) + 1
+            points_breakdown[bug['points']] = points_breakdown.get(bug['points'], 0) + 1
+            component_breakdown[bug['component']] = component_breakdown.get(bug['component'], 0) + 1
+
             bug['whiteboardflags'] = wb_data['flags']
 
         # FIXME - this fails if there's no bug data
@@ -346,6 +352,13 @@ class ProjectSprintView(MethodView):
             {'priority': key, 'count': priority_breakdown[key]}
             for key in sorted(priority_breakdown.keys(),
                               key=lambda p: p if p != '--' else 'P6')]
+        points_breakdown = [
+            {'num': key, 'count': points_breakdown[key]}
+            for key in sorted(points_breakdown.keys(),
+                              key=lambda p: p or '?')]
+        component_breakdown = [
+            {'name': key, 'count': component_breakdown[key]}
+            for key in sorted(component_breakdown.keys())]
 
         return jsonify({
             'project': project,
@@ -360,6 +373,8 @@ class ProjectSprintView(MethodView):
             'closed_points': closed_points,
             'bugs_with_no_points': bugs_with_no_points,
             'priority_breakdown': priority_breakdown,
+            'points_breakdown': points_breakdown,
+            'component_breakdown': component_breakdown,
         })
 
 

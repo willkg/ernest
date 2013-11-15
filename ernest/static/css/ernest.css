@@ -23,11 +23,13 @@ th {
     width: 100%;
 }
 
-tr.bug-row-resolved td {
+#bug-table tr.bug-row-resolved > td {
+    background-color: #dff0d8;
     text-decoration: line-through;
 }
 
-tr.bug-row-verified td {
+#bug-table tr.bug-row-verified > td {
+    background-color: #dff0d8;
     text-decoration: line-through;
 }
 

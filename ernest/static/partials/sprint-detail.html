@@ -103,15 +103,13 @@
           NEEDSINFO
           <span ng-repeat="person in bug.needinfo">{{person.username}} </span>
         </span>
-
         <span class="label label-important" ng-show="bug.is_blocked">
           BLOCKED
           <a ng-repeat="blocker in bug.open_blockers" ng-href="{{blocker.url}}">{{blocker.id}}</a>
         </span>
-
+        <span class="muted">{{bug.component}}</span>
         {{bug.summary}}
         <span class="label" ng-repeat="flag in bug.whiteboardflags">{{flag}}</span>
-
       </td>
       <td>{{bug.assigned_to.real_name}}</td>
       <td>{{bug.last_change_time|date:"M-d-yyyy H:mm"}}</td>
@@ -122,20 +120,33 @@
   </table>
 
   <h2>Sprint stats</h2>
-
-  <h3>Priority breakdown</h3>
-  <table class="table-striped table-condensed">
-    <tr ng-repeat="pri in priority_breakdown">
-      <td>{{pri.priority}}</td>
-      <td>{{pri.count}}</td>
-    </tr>
-  </table>
-
-  <h3>Points breakdown</h3>
-  <p>TODO</p>
-
-  <h3>Component breakdown</h3>
-  <p>TODO</p>
-
-  <h3>
+  <div class="row">
+    <div class="span4">
+      <h3>Priority breakdown</h3>
+      <table class="table-striped table-condensed">
+        <tr ng-repeat="pri in priority_breakdown">
+          <td>{{pri.priority}}</td>
+          <td>{{pri.count}}</td>
+        </tr>
+      </table>
+    </div>
+    <div class="span4">
+      <h3>Points breakdown</h3>
+      <table class="table-striped table-condensed">
+        <tr ng-repeat="point in points_breakdown">
+          <td>{{point.num}}</td>
+          <td>{{point.count}}</td>
+        </tr>
+      </table>
+    </div>
+    <div class="span4">
+      <h3>Component breakdown</h3>
+      <table class="table-striped table-condensed">
+        <tr ng-repeat="comp in component_breakdown">
+          <td>{{comp.name}}</td>
+          <td>{{comp.count}}</td>
+        </tr>
+      </table>
+    </div>
+  </div>
 </div>

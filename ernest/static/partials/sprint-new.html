@@ -1,0 +1,8 @@
+<!-- This is included in the project-detail if user is project admin. -->
+
+<span ng-controller="SprintNewCtrl">
+  <ng-form>
+    <input name="name" ng-model="newSprint.name" placeholder="Name of new sprint">
+    <button class="btn btn-primary" ng-click="createSprint()">Create</button>
+  </ng-form>
+</span>

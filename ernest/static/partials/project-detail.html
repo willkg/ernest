@@ -5,4 +5,8 @@
       <a ng-href="{{sprint.url}}">{{sprint.name}}</a>
     </li>
   </ul>
+
+  <div ng-show="is_admin">
+    <div ng-include="'/partials/sprint-new.html'"></div>
+  </div>
 </div>

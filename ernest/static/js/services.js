@@ -78,7 +78,7 @@ ernest.factory('Api', ['$resource',
                 isArray: false,
                 transformResponse: [parseJSON, augment],
                 cache: true
-            },
+            }
         });
     }
 ]);

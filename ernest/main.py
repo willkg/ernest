@@ -1,4 +1,3 @@
-import datetime
 import os
 import re
 import uuid
@@ -12,6 +11,7 @@ from flask.ext.cache import Cache
 from flask.ext.sqlalchemy import SQLAlchemy
 
 from flask_sslify import SSLify
+from sqlalchemy.orm.exc import NoResultFound
 from werkzeug.routing import BaseConverter
 
 from .bugzilla import BugzillaTracker
@@ -112,6 +112,22 @@ class Project(db.Model):
         }
 
 
+class ProjectAdmin(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    account = db.Column(db.String(100))
+
+    project_id = db.Column(db.Integer, db.ForeignKey('project.id'))
+    project = db.relationship('Project',
+        backref=db.backref('admin', lazy='dynamic'))
+
+    def __init__(self, project_id, account):
+        self.project_id = project_id
+        self.account = account
+
+    def __repr__(self):
+        return '<ProjectAdmin {0}>'.format(self.account)
+
+
 class Sprint(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(20))
@@ -195,6 +211,14 @@ def basecontext():
 # Views and routes
 # ----------------------------------------
 
+def is_admin(username, project):
+    try:
+        db.session.query(ProjectAdmin).filter_by(account=username, project_id=project.id).one()
+        return True
+    except NoResultFound:
+        return False
+
+
 class RegexConverter(BaseConverter):
     def __init__(self, url_map, *items):
         super(RegexConverter, self).__init__(url_map)
@@ -221,8 +245,26 @@ class ProjectSprintListView(MethodView):
             project_id=project.id).all()
 
         return jsonify({
+            'is_admin': is_admin(request.cookies.get('username'), project),
             'project': project,
             'sprints': sprints
+        })
+
+    def post(self, projectslug):
+        """This creates a new sprint."""
+        proj = db.session.query(Project).filter_by(slug=projectslug).one()
+
+        if not is_admin(request.cookies.get('username'), proj):
+            # This is bad since this is probably JSON.
+            abort(403)
+
+        json_data = request.get_json(force=True)
+        name = json_data['name']
+        new_sprint = Sprint(project_id=proj.id, name=name)
+        db.session.add(new_sprint)
+        db.session.commit()
+        return jsonify({
+            'new_sprint': new_sprint
         })
 
 
@@ -457,6 +499,7 @@ app.add_url_rule('/api/project/<projectslug>',
                  view_func=ProjectSprintListView.as_view('project-sprint-list'))
 app.add_url_rule('/api/project',
                  view_func=ProjectListView.as_view('project-list'))
+
 app.add_url_rule('/api/logout', view_func=LogoutView.as_view('logout'))
 app.add_url_rule('/api/login', view_func=LoginView.as_view('login'))
 

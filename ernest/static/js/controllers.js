@@ -20,16 +20,53 @@ ernest.controller('ProjectListCtrl', ['$scope', 'Api',
     }
 ]);
 
-ernest.controller('ProjectDetailCtrl', ['$scope', '$routeParams', 'Api',
-    function($scope, $routeParams, Api) {
-        $scope.$emit('loading+');
+ernest.controller('ProjectDetailCtrl', ['$scope', '$routeParams', '$cacheFactory', 'Api',
+    function($scope, $routeParams, $cacheFactory, Api) {
+        function getData() {
+            $scope.$emit('loading+');
 
-        Api.get($routeParams).$promise.then(function(data) {
-            $scope.project = data.project;
-            $scope.sprints = data.sprints;
+            var p = Api.get($routeParams).$promise.then(function(data) {
+                $scope.project = data.project;
+                $scope.sprints = data.sprints;
+                $scope.is_admin = data.is_admin;
 
-            $scope.$emit('loading-');
-        });
+                $scope.$emit('loading-');
+            });
+            return p;
+        }
+
+        $scope.refresh = function() {
+            var url = '/api/project/' + $routeParams.projSlug;
+            $cacheFactory.get('$http').remove(url);
+            return getData();
+        };
+
+        $scope.$on('newSprint', function() { $scope.refresh(); });
+        $scope.$on('login', function() { $scope.refresh(); });
+        $scope.$on('logout', function() { $scope.refresh(); });
+
+        getData();
+    }
+]);
+
+ernest.controller('SprintNewCtrl', ['$scope', '$routeParams', '$http',
+    function($scope, $routeParams, $http) {
+        $scope.newSprint = {name: ''};
+
+        $scope.createSprint = function() {
+            var url = '/api/project/' + $routeParams.projSlug;
+            $scope.$emit('loading+');
+            $http.post(url, $scope.newSprint)
+                .success(function(err) {
+                    $scope.$emit('newSprint');
+                    $scope.$emit('loading-');
+                    $scope.newSprint = {name: ''};
+                })
+                .error(function(err) {
+                    console.log(err);
+                    $scope.$emit('loading-');
+                });
+        };
     }
 ]);
 

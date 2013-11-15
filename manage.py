@@ -5,7 +5,7 @@ from flask.ext.script import Manager
 from sqlalchemy.exc import IntegrityError, OperationalError, ProgrammingError
 from sqlalchemy.orm.exc import NoResultFound
 
-from ernest.main import app, db, Project, Sprint
+from ernest.main import app, db, Project, ProjectAdmin, Sprint
 
 
 manager = Manager(app)
@@ -62,8 +62,29 @@ def create_project(projectname):
 
 
 @manager.command
+def create_admin(projectname, adminaccount):
+    """Add an admin to a project"""
+    try:
+        proj = db.session.query(Project).filter_by(name=projectname).one()
+    except NoResultFound:
+        print 'Error: Project "{0}" does not exist.'.format(projectname)
+        return
+
+    try:
+        new_admin = ProjectAdmin(project_id=proj.id, account=adminaccount)
+        db.session.add(new_admin)
+        db.session.commit()
+    except IntegrityError:
+        print 'Error: Admin with account "{0}" already exists for project {1}.'.format(
+            adminaccount, projectname)
+        return
+
+    print 'Created admin {0} for project {1}.'.format(adminaccount, projectname)
+
+
+@manager.command
 def create_sprint(projectname, sprintname):
-    """Create a new spring for a project"""
+    """Create a new sprint for a project"""
     try:
         proj = db.session.query(Project).filter_by(name=projectname).one()
     except NoResultFound:

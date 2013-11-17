@@ -6,10 +6,10 @@ import requests
 
 
 WHITEBOARD_SPRINT_RE = re.compile(
-    r'u=(?P<user>[^\s]+) '
-    r'c=(?P<component>[^\s]+) '
-    r'p=(?P<points>[^\s]+) '
-    r's=(?P<sprint>[^\s]+)')
+    r'u=(?P<user>[^\s]*) '
+    r'c=(?P<component>[^\s]*) '
+    r'p=(?P<points>[^\s]*) '
+    r's=(?P<sprint>[^\s]*)')
 WHITEBOARD_FLAGS_RE = re.compile(r'\[(?P<flag>[^\]]+)\]')
 
 
@@ -32,10 +32,11 @@ class BugzillaTracker(object):
         if wb_sprint_match:
             wb_data['u'] = wb_sprint_match.group('user')
             wb_data['c'] = wb_sprint_match.group('component')
+            # Points are either an integer or an empty string
             try:
                 wb_data['p'] = int(wb_sprint_match.group('points'))
             except ValueError:
-                pass
+                wb_data['p'] = ''
             wb_data['s'] = wb_sprint_match.group('sprint')
 
         wb_data['flags'] = WHITEBOARD_FLAGS_RE.findall(whiteboard)

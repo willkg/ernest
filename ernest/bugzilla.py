@@ -36,7 +36,7 @@ class BugzillaTracker(object):
             try:
                 wb_data['p'] = int(wb_sprint_match.group('points'))
             except ValueError:
-                wb_data['p'] = ''
+                pass
             wb_data['s'] = wb_sprint_match.group('sprint')
 
         wb_data['flags'] = WHITEBOARD_FLAGS_RE.findall(whiteboard)

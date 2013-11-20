@@ -241,8 +241,10 @@ class ProjectSprintListView(MethodView):
         project = db.session.query(Project).filter_by(slug=projectslug).one()
 
         # FIXME - this can raise an error
-        sprints = db.session.query(Sprint).filter_by(
-            project_id=project.id).all()
+        sprints = (db.session.query(Sprint)
+                   .filter_by(project_id=project.id)
+                   .order_by(Sprint.name)
+                   .all())
 
         return jsonify({
             'is_admin': is_admin(request.cookies.get('username'), project),

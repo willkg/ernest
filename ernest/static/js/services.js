@@ -21,9 +21,29 @@ ernest.factory('Api', ['$resource',
             return proj;
         }
 
-        function augmentSprint(project, sprint) {
+        function augmentSprint(project, sprint, bugs) {
+            var i, buglist_all = [], buglist_open = [];
+
             sprint.project = project;
             sprint.url = '/project/' + project.slug + '/' + sprint.slug;
+
+            // bugzilla buglist urls
+            if (bugs) {
+                for (i = 0; i < bugs.length; i++) {
+                    buglist_all.push(bugs[i].id);
+                    if (bugs[i].status.toLowerCase() !== 'resolved'
+                        && bugs[i].status.toLowerCase() !== 'verified') {
+
+                        buglist_open.push(bugs[i].id);
+                    }
+                }
+                sprint.buglist_all_url = 'https://bugzilla.mozilla.org/buglist.cgi?bug_id=' +
+                    buglist_all.join(',');
+
+                sprint.buglist_open_url = 'https://bugzilla.mozilla.org/buglist.cgi?bug_id=' +
+                    buglist_open.join(',');
+            }
+
             return sprint;
         }
 
@@ -55,7 +75,7 @@ ernest.factory('Api', ['$resource',
                 data.prev_sprint = augmentSprint(data.project, data.prev_sprint);
             }
             if (data.sprint) {
-                data.sprint = augmentSprint(data.project, data.sprint);
+                data.sprint = augmentSprint(data.project, data.sprint, data.bugs);
             }
             if (data.next_sprint) {
                 data.next_sprint = augmentSprint(data.project, data.next_sprint);

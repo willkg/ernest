@@ -52,15 +52,14 @@
       </dl>
     </div>
 
-    <div class="span2">
+    <div class="span2 pull-right">
       <ng-form>
-        <button ng-click="refresh()">Refresh now</button>
+        <button class="btn btn-margined" ng-click="refresh()">Refresh now <i class="icon-refresh"></i></button>
       </ng-form>
     </div>
   </div>
 
   <table id="bug-table" class="table-striped table-condensed">
-
     <tr>
       <th>
         ID
@@ -116,8 +115,12 @@
       <td>{{bug.status}}</td>
       <td>{{bug.points}}</td>
     </tr>
-
   </table>
+
+  <div id="buglists" class="container">
+    <a ng-show="sprint.buglist_open_url" class="btn pull-right btn-margined" href="{{ sprint.buglist_open_url }}">See Open in Bugzilla</a>
+    <a ng-show="sprint.buglist_all_url" class="btn pull-right btn-margined" href="{{ sprint.buglist_all_url }}">See All in Bugzilla</a>
+  </div>
 
   <h2>Sprint stats</h2>
   <div class="row">

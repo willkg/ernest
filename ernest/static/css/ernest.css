@@ -10,10 +10,6 @@
     margin: 20px 0px 20px 0px;
 }
 
-#buglists > a {
-    margin: 5px 0px 5px 5px;
-}
-
 .container {
     /* FIXME - srsly. */
     width: 1000px;

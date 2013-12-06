@@ -26,7 +26,7 @@
   </h1>
 
   <div class="row">
-    <div class="span5">
+    <div class="span6">
       <dl class="dl-horizontal">
         <dt>Last refresh</dt>
         <dd>{{last_load|date:"M-d-yyyy H:mm"}}</dd>
@@ -37,7 +37,7 @@
       </dl>
     </div>
 
-    <div class="span5">
+    <div class="span6">
       <dl class="dl-horizontal">
         <dt>Bugs completed</dt>
         <dd>{{ closed_bugs }} / {{ total_bugs }}</dd>
@@ -51,11 +51,18 @@
         </span>
       </dl>
     </div>
+  </div>
 
-    <div class="span2 pull-right">
-      <ng-form>
-        <button class="btn btn-margined" ng-click="refresh()">Refresh now <i class="icon-refresh"></i></button>
-      </ng-form>
+  <div id="operations" class="container" ng-show="bugs">
+    <div class="btn-toolbar pull-right">
+      <div class="btn-group">
+        <a ng-show="sprint.buglist_open_url" class="btn" href="{{ sprint.buglist_open_url }}">See Open in Bugzilla</a>
+        <a ng-show="sprint.buglist_all_url" class="btn" href="{{ sprint.buglist_all_url }}">See All in Bugzilla</a>
+      </div>
+      <div class="btn-group">
+        <a class="btn" ng-click="changeShowHideClosed()">{{ show_hide_closed }}</a>
+        <a class="btn" ng-click="refresh()">Refresh now <i class="icon-refresh"></i></a>
+      </div>
     </div>
   </div>
 
@@ -116,11 +123,6 @@
       <td>{{bug.points}}</td>
     </tr>
   </table>
-
-  <div id="buglists" class="container">
-    <a ng-show="sprint.buglist_open_url" class="btn pull-right btn-margined" href="{{ sprint.buglist_open_url }}">See Open in Bugzilla</a>
-    <a ng-show="sprint.buglist_all_url" class="btn pull-right btn-margined" href="{{ sprint.buglist_all_url }}">See All in Bugzilla</a>
-  </div>
 
   <h2>Sprint stats</h2>
   <div class="row">

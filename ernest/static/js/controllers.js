@@ -72,7 +72,7 @@ ernest.controller('SprintNewCtrl', ['$scope', '$routeParams', '$http',
 
 ernest.controller('SprintDetailCtrl', ['$scope', '$routeParams', '$cacheFactory', 'Api',
     function($scope, $routeParams, $cacheFactory, Api) {
-
+        $scope.showClosed = true;
         $scope.bugSortBy = {key: 'priority', reverse: false};
         $scope.bugSort = function(bug) {
             var val = bug[$scope.bugSortBy.key];
@@ -98,6 +98,18 @@ ernest.controller('SprintDetailCtrl', ['$scope', '$routeParams', '$cacheFactory'
         $scope.$on('login', function() { $scope.refresh(); });
         $scope.$on('logout', function() { $scope.refresh(); });
 
+        $scope.changeShowHideClosed = function() {
+            if ($scope.showClosed) {
+                $scope.bugs = $scope.openBugs;
+                $scope.showClosed = false;
+                 $scope.show_hide_closed = 'Show closed';
+            } else {
+                $scope.bugs = $scope.allBugs;
+                $scope.showClosed = true;
+                 $scope.show_hide_closed = 'Hide closed';
+            }
+        };
+
         function getData() {
             $scope.$emit('loading+');
 
@@ -105,6 +117,11 @@ ernest.controller('SprintDetailCtrl', ['$scope', '$routeParams', '$cacheFactory'
                 $scope.$emit('loading-');
 
                 $scope.bugs = data.bugs;
+                $scope.allBugs = $scope.bugs;
+                $scope.openBugs = $scope.bugs.filter(function(bug) {
+                    return (bug.status !== 'VERIFIED' && bug.status !== 'RESOLVED');
+                });
+                $scope.show_hide_closed = 'Hide closed';
                 $scope.bugs_with_no_points = data.bugs_with_no_points;
                 $scope.latest_change_time = data.latest_change_time;
                 $scope.prev_sprint = data.prev_sprint;

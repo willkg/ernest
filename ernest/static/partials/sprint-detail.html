@@ -120,7 +120,10 @@
       <td>{{bug.assigned_to.real_name}}</td>
       <td>{{bug.last_change_time|date:"M-d-yyyy H:mm"}}</td>
       <td>{{bug.status}}</td>
-      <td>{{bug.points}}</td>
+      <td>
+        <span ng-show="bug.points">{{bug.points}}</span>
+        <span ng-hide="bug.points" class="label label-important">None</span>
+      </td>
     </tr>
   </table>
 

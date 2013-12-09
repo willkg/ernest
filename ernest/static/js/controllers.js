@@ -56,7 +56,6 @@ ernest.controller('ProjectDetailCtrl', ['$scope', '$routeParams', '$cacheFactory
                     $scope.sprints = data.sprints;
                     $scope.is_admin = data.is_admin;
                     $scope.trackers = data.trackers;
-
                     $scope.$emit('loading-');
                 },
                 function(error) {
@@ -101,8 +100,8 @@ ernest.controller('SprintNewCtrl', ['$scope', '$routeParams', '$http',
     }
 ]);
 
-ernest.controller('SprintDetailCtrl', ['$scope', '$routeParams', '$cacheFactory', 'Api',
-    function($scope, $routeParams, $cacheFactory, Api) {
+ernest.controller('SprintDetailCtrl', ['$scope', '$routeParams', '$http', '$cacheFactory', 'Api',
+    function($scope, $routeParams, $http, $cacheFactory, Api) {
         $scope.showClosed = true;
         $scope.bugSortBy = {key: 'priority', reverse: false};
         $scope.bugSort = function(bug) {
@@ -135,6 +134,25 @@ ernest.controller('SprintDetailCtrl', ['$scope', '$routeParams', '$cacheFactory'
             return val != null;
         };
 
+        $scope.updateSprint = function() {
+            var sprint = $scope.sprint;
+            var proj = sprint.project;
+            var url = '/api/project/' + proj.slug + '/' + sprint.slug;
+
+            var data = {notes: $scope.sprint.notes, postmortem: $scope.sprint.postmortem};
+
+            $scope.$emit('loading+');
+            $http.post(url, data)
+                .success(function(err) {
+                    $scope.$emit('updateSprint');
+                    $scope.$emit('loading-');
+                })
+                .error(function(err) {
+                    console.log(err);
+                    $scope.$emit('loading-');
+                });
+        };
+
         $scope.refresh = function() {
             var sprint = $scope.sprint;
             var proj = sprint.project;
@@ -161,6 +179,26 @@ ernest.controller('SprintDetailCtrl', ['$scope', '$routeParams', '$cacheFactory'
             }
         };
 
+        $scope.changeSprint = function() {
+            var sprint = $scope.sprint;
+            var proj = sprint.project;
+            if (!sprint || !proj) {
+                return;
+            }
+            var url = '/api/project/' + proj.slug + '/' + sprint.slug;
+
+            $scope.$emit('loading+');
+            $http.post(url, $scope.sprintNotes)
+                .success(function(err) {
+                    $scope.$emit('loading-');
+                    $scope.newSprint = {name: ''};
+                })
+                .error(function(err) {
+                    console.log(err);
+                    $scope.$emit('loading-');
+                });
+        };
+
         function getData() {
             $scope.$emit('loading+');
 
@@ -169,6 +207,7 @@ ernest.controller('SprintDetailCtrl', ['$scope', '$routeParams', '$cacheFactory'
                     $scope.$emit('loading-');
 
                     $scope.project = data.project;
+                    $scope.is_admin = data.is_admin;
 
                     $scope.allBugs = data.bugs;
                     $scope.openBugs = data.bugs.filter(function(bug) {
@@ -213,6 +252,15 @@ ernest.controller('SprintDetailCtrl', ['$scope', '$routeParams', '$cacheFactory'
                     $scope.$emit('loading-');
                     $scope.last_load = new Date();
                 });
+
+            if ($scope.showClosed) {
+                $scope.bugs = $scope.allBugs;
+                $scope.show_hide_closed = 'Hide closed';
+            } else {
+                $scope.bugs = $scope.openBugs;
+                $scope.show_hide_closed = 'Show closed';
+            }
+
             return p;
         }
 

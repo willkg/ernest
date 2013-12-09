@@ -437,6 +437,7 @@ class ProjectSprintView(MethodView):
             for key in sorted(component_breakdown.keys())]
 
         return jsonify({
+            'is_admin': is_admin(request.cookies.get('username'), project),
             'project': project,
             'prev_sprint': prev_sprint,
             'sprint': sprint,
@@ -451,6 +452,35 @@ class ProjectSprintView(MethodView):
             'priority_breakdown': priority_breakdown,
             'points_breakdown': points_breakdown,
             'component_breakdown': component_breakdown,
+        })
+
+    def post(self, projectslug, sprintslug):
+        """This adjusts sprint details."""
+        # FIXME - this can raise an error
+        proj = db.session.query(Project).filter_by(slug=projectslug).one()
+
+        # FIXME - this can raise an error
+        sprint = (db.session.query(Sprint)
+                  .filter_by(project_id=proj.id, slug=sprintslug).one())
+
+        if not is_admin(request.cookies.get('username'), proj):
+            # This is bad since this is probably JSON.
+            abort(403)
+
+        json_data = request.get_json(force=True)
+
+        notes = json_data.get('notes', None)
+        if notes is not None:
+            sprint.notes = notes
+
+        postmortem = json_data.get('postmortem', None)
+        if postmortem is not None:
+            sprint.postmortem = postmortem
+
+        db.session.add(sprint)
+        db.session.commit()
+        return jsonify({
+            'sprint': sprint
         })
 
 

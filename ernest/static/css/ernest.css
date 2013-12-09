@@ -8,6 +8,10 @@
     margin: 20px 0px 20px 0px;
 }
 
+#sprintnotes textarea {
+    width: 100%;
+}
+
 .container {
     width: 1000px;
 }

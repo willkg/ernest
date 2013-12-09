@@ -150,10 +150,9 @@
     </tr>
   </table>
 
-  <h2>Stats:</h2>
   <div class="row">
     <div class="span4">
-      <h3>Priority breakdown</h3>
+      <h3>Priority breakdown:</h3>
       <table class="table-striped table-condensed">
         <tr ng-repeat="pri in priority_breakdown">
           <td>{{pri.priority}}</td>
@@ -162,7 +161,7 @@
       </table>
     </div>
     <div class="span4">
-      <h3>Points breakdown</h3>
+      <h3>Points breakdown:</h3>
       <table class="table-striped table-condensed">
         <tr ng-repeat="point in points_breakdown">
           <td>{{point.num}}</td>
@@ -171,13 +170,35 @@
       </table>
     </div>
     <div class="span4">
-      <h3>Component breakdown</h3>
+      <h3>Component breakdown:</h3>
       <table class="table-striped table-condensed">
         <tr ng-repeat="comp in component_breakdown">
           <td>{{comp.name}}</td>
           <td>{{comp.count}}</td>
         </tr>
       </table>
+    </div>
+  </div>
+    <p>Note: It'd be nice if these were pie charts.</p>
+
+  <div id="sprintnotes">
+    <div ng-show="is_admin">
+      <ng-form>
+        <label for="sprintnotes">Notes:</label>
+        <textarea id="sprintnotes" name="notes" ng-model="sprint.notes"></textarea>
+
+        <label for="sprintpostmortem">Post mortem:</label>
+        <textarea id="sprintpostmortem" name="postmortem" ng-model="sprint.postmortem"></textarea>
+
+        <button type="btn btn-primary" ng-click="updateSprint()">Save</button>
+      </ng-form>
+    </div>
+    <div ng-hide="is_admin" class="container">
+      <h3>Notes:</h3>
+      <pre>{{sprint.notes}}</pre>
+      <h3>Post mortem:</h3>
+      <pre>{{sprint.postmortem}}</pre>
+      <p>Note: Project admin can update the notes and postmortem.</p>
     </div>
   </div>
 </div>

@@ -84,6 +84,13 @@ ernest.controller('SprintDetailCtrl', ['$scope', '$routeParams', '$cacheFactory'
             return val;
         };
 
+        $scope.isClosed = function(val) {
+            // Bugs are "closed" if they're either resolved or
+            // verified.
+            return (val.toLowerCase() === 'resolved'
+                    || val.toLowerCase() === 'verified');
+        };
+
         $scope.isEstimated = function(val) {
             // Points field can be a number or null. Numbers indicate
             // it was estimated and null indicates it hasn't been

@@ -100,7 +100,12 @@
 
     <tr class="bug-row" ng-class="'bug-row-' + bug.status.toLowerCase()"
         ng-repeat="bug in bugs | orderBy:bugSort:bugSortBy.reverse">
-      <td><a ng-href="{{bug.url}}">{{bug.id}}</a></td>
+      <td>
+        <span class="keep-whole">
+          <span ng-show="isClosed(bug.status)"><i class="icon-ok"></i></span>
+          <a ng-href="{{bug.url}}">{{bug.id}}</a>
+        </span>
+      </td>
       <td>{{bug.priority}}</td>
       <td>
         <span class="label label-important" ng-show="bug.securitygroup">SECURE</span>

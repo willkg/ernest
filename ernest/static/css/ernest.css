@@ -15,6 +15,7 @@
     width: 1000px;
 }
 
+.keep-whole,
 th {
     white-space: nowrap;
 }
@@ -23,14 +24,9 @@ th {
     width: 100%;
 }
 
-#bug-table tr.bug-row-resolved > td {
-    background-color: #dff0d8;
-    text-decoration: line-through;
-}
-
+#bug-table tr.bug-row-resolved > td,
 #bug-table tr.bug-row-verified > td {
     background-color: #dff0d8;
-    text-decoration: line-through;
 }
 
 .loading {

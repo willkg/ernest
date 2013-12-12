@@ -121,8 +121,8 @@
       <td>{{bug.last_change_time|date:"M-d-yyyy H:mm"}}</td>
       <td>{{bug.status}}</td>
       <td>
-        <span ng-show="bug.points">{{bug.points}}</span>
-        <span ng-hide="bug.points" class="label label-important">None</span>
+        <span ng-show="isEstimated(bug.points)">{{bug.points}}</span>
+        <span ng-hide="isEstimated(bug.points)" class="label label-important">None</span>
       </td>
     </tr>
   </table>

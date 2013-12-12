@@ -84,6 +84,13 @@ ernest.controller('SprintDetailCtrl', ['$scope', '$routeParams', '$cacheFactory'
             return val;
         };
 
+        $scope.isEstimated = function(val) {
+            // Points field can be a number or null. Numbers indicate
+            // it was estimated and null indicates it hasn't been
+            // estimated.
+            return val != null;
+        };
+
         $scope.refresh = function() {
             var sprint = $scope.sprint;
             var proj = sprint.project;

@@ -116,11 +116,11 @@ ernest.controller('SprintDetailCtrl', ['$scope', '$routeParams', '$cacheFactory'
             if ($scope.showClosed) {
                 $scope.bugs = $scope.openBugs;
                 $scope.showClosed = false;
-                 $scope.show_hide_closed = 'Show closed';
+                $scope.show_hide_closed = 'Show closed';
             } else {
                 $scope.bugs = $scope.allBugs;
                 $scope.showClosed = true;
-                 $scope.show_hide_closed = 'Hide closed';
+                $scope.show_hide_closed = 'Hide closed';
             }
         };
 
@@ -130,12 +130,19 @@ ernest.controller('SprintDetailCtrl', ['$scope', '$routeParams', '$cacheFactory'
             var p = Api.get($routeParams).$promise.then(function(data) {
                 $scope.$emit('loading-');
 
-                $scope.bugs = data.bugs;
-                $scope.allBugs = $scope.bugs;
-                $scope.openBugs = $scope.bugs.filter(function(bug) {
+                $scope.allBugs = data.bugs;
+                $scope.openBugs = data.bugs.filter(function(bug) {
                     return (bug.status !== 'VERIFIED' && bug.status !== 'RESOLVED');
                 });
-                $scope.show_hide_closed = 'Hide closed';
+
+                if ($scope.showClosed) {
+                    $scope.bugs = $scope.allBugs;
+                    $scope.show_hide_closed = 'Hide closed';
+                } else {
+                    $scope.bugs = $scope.openBugs;
+                    $scope.show_hide_closed = 'Show closed';
+                }
+
                 $scope.bugs_with_no_points = data.bugs_with_no_points;
                 $scope.latest_change_time = data.latest_change_time;
                 $scope.prev_sprint = data.prev_sprint;

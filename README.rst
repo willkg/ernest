@@ -123,6 +123,13 @@ Create the app:
     More details on `Buchner build pack here
     <https://github.com/rehandalal/heroku-buildpack-buchner>`_.
 
+Push configuration settings:
+
+    ::
+
+        # Set the CACHE_TYPE to use memcached
+        $ heroku config:set CACHE_TYPE:saslmemcached
+
 Create the db:
 
     ::

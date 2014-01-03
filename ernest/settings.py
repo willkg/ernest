@@ -52,6 +52,10 @@ ADMIN = []
 # Ernest uses Flask-Cache.
 # http://pythonhosted.org/Flask-Cache/
 
+# Default to the simple cache type. In production environments, you
+# should be using 'saslmemcached'.
+CACHE_TYPE = 'simple'
+
 # Cache key prefix to differentiate between other things that might be
 # using the same cache.
 CACHE_KEY_PREFIX = 'ernest:'

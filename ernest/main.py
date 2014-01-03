@@ -169,12 +169,10 @@ class Sprint(db.Model):
 # Cache stuff
 # ----------------------------------------
 
-if app.config.get('CACHE_MEMCACHED_SERVERS', None):
-    print 'Using SASLmemcached'
-    app.config['CACHE_TYPE'] = 'saslmemcached'
-else:
-    print 'Using SimpleCache'
+if app.config.get('CACHE_TYPE', None) is None:
     app.config['CACHE_TYPE'] = 'simple'
+
+print 'CACHE_TYPE set to "{0}"'.format(app.config['CACHE_TYPE'])
 
 app.cache = Cache(app)
 

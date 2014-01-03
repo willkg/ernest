@@ -29,7 +29,7 @@ Install and configure
 
 3. (optional) ``npm install`` if you want to run the JS tests.
 
-4. ``cp ernest/setting_local.py-dist ernest/settings_local.py``
+4. ``cp ernest/settings_local.py-dist ernest/settings_local.py``
 
 5. Edit ``ernest/settings_local.py``.
 

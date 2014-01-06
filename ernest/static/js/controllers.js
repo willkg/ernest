@@ -79,7 +79,13 @@ ernest.controller('SprintDetailCtrl', ['$scope', '$routeParams', '$cacheFactory'
             if ($scope.bugSortBy.key === 'priority' && val === '--') {
                 val = 'P6';
             } else if ($scope.bugSortBy.key === 'assigned_to') {
-                val = val.real_name;
+                if (bug.mine) {
+                    // '\0' aka the null character will be sorted before
+                    // anything else. It's kind of like -Infinity for strings.
+                    val = '\0';
+                } else {
+                    val = val.real_name;
+                }
             }
             return val;
         };

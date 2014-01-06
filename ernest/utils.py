@@ -1,5 +1,7 @@
+import hashlib
 import json
 import subprocess
+from urllib import urlencode
 
 from flask import Response, request
 
@@ -33,3 +35,18 @@ def truthiness(s):
         return str(s).lower() in ['true', 't', '1']
     except (TypeError, ValueError, UnicodeEncodeError):
         return False
+
+
+def gravatar_url(email, size=None):
+    """Returns a gravatar URL for the email provided."""
+    m = hashlib.md5(email.lower())
+    hash = m.hexdigest()
+    url = 'http://www.gravatar.com/avatar/' + hash
+
+    qs = {}
+
+    if size:
+        qs['s'] = size
+
+    url += '?' + urlencode(qs)
+    return url

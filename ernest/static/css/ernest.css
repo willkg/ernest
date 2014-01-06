@@ -32,9 +32,15 @@ th {
 #bug-table tr.mine td.summary:before {
     content: "»";
     float: left;
-    transform: translate(-22px, 0px);
     font-size: 1.75em;
     margin-right: -2em;
+    transform: translate(-22px, 0px);
+}
+
+#bug-table td.assigned img {
+    border-radius:5px;
+    float:left;
+    margin-right: 5px;
 }
 
 .loading {

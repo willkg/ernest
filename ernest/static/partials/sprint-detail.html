@@ -124,8 +124,10 @@
         <span class="label" ng-repeat="flag in bug.whiteboardflags">{{flag}}</span>
       </td>
       <td class="assigned">
-        <span ng-show="bug.assigned_to.real_name">
+        <span ng-show="bug.gravatar_url">
           <img style="border-radius:5px; float:left; margin-right: 5px;" src="{{bug.gravatar_url}}" />
+        </span>
+        <span ng-show="bug.assigned_to.real_name">
           {{bug.assigned_to.real_name}}
         </span>
       </td>

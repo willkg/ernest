@@ -344,8 +344,10 @@ class ProjectSprintView(MethodView):
                 bug['assigned_to'] = {}
 
             email = bug.get('assigned_to', {}).get('name')
-            if email:
+            if email and my_email:
                 bug['gravatar_url'] = gravatar_url(email, 40)
+            else:
+                bug['gravatar_url'] = False
 
             if email and email == my_email:
                 bug['mine'] = True

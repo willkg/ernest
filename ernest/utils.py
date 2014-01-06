@@ -41,7 +41,7 @@ def gravatar_url(email, size=None):
     """Returns a gravatar URL for the email provided."""
     m = hashlib.md5(email.lower())
     hash = m.hexdigest()
-    url = 'http://www.gravatar.com/avatar/' + hash
+    url = 'https://secure.gravatar.com/avatar/' + hash
 
     qs = {}
 

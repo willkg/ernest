@@ -24,9 +24,17 @@ th {
     width: 100%;
 }
 
-#bug-table tr.bug-row-resolved > td,
-#bug-table tr.bug-row-verified > td {
+#bug-table tr.closed > td,
+#bug-table tr.closed > td {
     background-color: #dff0d8;
+}
+
+#bug-table tr.mine td.summary:before {
+    content: "»";
+    float: left;
+    transform: translate(-22px, 0px);
+    font-size: 1.75em;
+    margin-right: -2em;
 }
 
 .loading {

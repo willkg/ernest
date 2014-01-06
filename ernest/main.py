@@ -16,6 +16,7 @@ from werkzeug.routing import BaseConverter
 
 from .bugzilla import BugzillaTracker
 from .version import VERSION, VERSION_RAW
+from .utils import gravatar_url
 
 
 # ----------------------------------------
@@ -293,6 +294,7 @@ class ProjectSprintView(MethodView):
                 break
 
         token = request.cookies.get('token')
+        my_email = request.cookies.get('username')
         changed_after = request.args.get('since')
 
         components = [
@@ -340,6 +342,17 @@ class ProjectSprintView(MethodView):
                 # This nixes the assigned_to because it's silly long
                 # when no one is assigned to the bug.
                 bug['assigned_to'] = {}
+
+            email = bug.get('assigned_to', {}).get('name')
+            if email and my_email:
+                bug['gravatar_url'] = gravatar_url(email, 40)
+            else:
+                bug['gravatar_url'] = False
+
+            if email and email == my_email:
+                bug['mine'] = True
+            else:
+                bug['mine'] = False
 
             for flag in bug.get('flags', []):
                 if flag['name'] == 'needinfo':
@@ -451,13 +464,13 @@ class LoginView(MethodView):
             cache_set(token_cache_key, {
                 'Bugzilla_login': cookies['Bugzilla_login'],
                 'Bugzilla_logincookie': cookies['Bugzilla_logincookie'],
-                'username': request.json['login']
+                'username': json_data['login']
             }, MONTH)
             login_response['result'] = 'success'
             login_response['token'] = token
             response = make_response(jsonify(login_response))
             response.set_cookie('token', token)
-            response.set_cookie('username', request.json['login'])
+            response.set_cookie('username', json_data['login'])
             return response
         else:
             abort(401, "Either your username or password was incorrect")

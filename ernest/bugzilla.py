@@ -206,5 +206,4 @@ class BugzillaTracker(object):
         if r.status_code != 200:
             raise BugzillaError(r.text)
 
-        response_text = r.text
-        return json.loads(response_text)
+        return json.loads(r.text)

@@ -21,9 +21,9 @@ BUGZILLA_LOGIN_URL = 'https://bugzilla.mozilla.org/index.cgi'
 # Set the Bugzilla API url.
 BUGZILLA_API_URL = 'https://api-dev.bugzilla.mozilla.org/latest'
 
-# List of Bugzilla logins that are also considered Ernest admin. These
-# people can create new projects, sprints, etc.
-ADMIN = []
+# This will fail if there's no SECRET_KEY in the environment.
+# Either provide it there or add it to settings_local.py
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # ------------------------------------------------
 # Database
@@ -43,7 +43,6 @@ ADMIN = []
 #         os.path.join(os.path.dirname(__file__), '..')
 #     )
 # )
-
 
 # This imports settings_local.py thus everything in that file
 # overrides what's in this file.

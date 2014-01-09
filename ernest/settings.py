@@ -45,34 +45,6 @@ ADMIN = []
 # )
 
 
-# ------------------------------------------------
-# Ernest supports several different cache systems.
-# ------------------------------------------------
-
-# Ernest uses Flask-Cache.
-# http://pythonhosted.org/Flask-Cache/
-
-# Default to the simple cache type. In production environments, you
-# should be using 'saslmemcached'.
-CACHE_TYPE = 'simple'
-
-# Cache key prefix to differentiate between other things that might be
-# using the same cache.
-CACHE_KEY_PREFIX = 'ernest:'
-
-# Note: If you're using Heroku and Memcachier, these will get pulled
-# from the environment automatically---you don't need to set them
-# manually.
-
-# list of memcached servers
-# CACHE_MEMCACHED_SERVERS = ['127.0.0.1:11211']
-
-# memcached username (if any)
-# CACHE_MEMCACHED_USERNAME = 'joe'
-
-# memcached password (if any)
-# CACHE_MEMCACHED_PASSWORD = 'password'
-
 # This imports settings_local.py thus everything in that file
 # overrides what's in this file.
 try:

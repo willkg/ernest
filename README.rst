@@ -43,9 +43,6 @@ Install and configure
    This creates the database based on the settings in
    ``ernest/settings_local.py``.
 
-7. Install and run memcached.
-
-
 
 Create projects and sprints
 ===========================
@@ -123,13 +120,6 @@ Create the app:
     More details on `Buchner build pack here
     <https://github.com/rehandalal/heroku-buildpack-buchner>`_.
 
-Push configuration settings:
-
-    ::
-
-        # Set the CACHE_TYPE to use memcached
-        $ heroku config:set CACHE_TYPE:saslmemcached
-
 Create the db:
 
     ::
@@ -144,15 +134,6 @@ Create the db:
 
     More details on `Postgres on Heroku here
     <https://devcenter.heroku.com/articles/heroku-postgresql>`_.
-
-
-Create the memcached:
-
-    ::
-
-        # Install memcachier
-        $ heroku addons:add memcachier:dev
-
 
 Create a dyno and make sure it's working:
 

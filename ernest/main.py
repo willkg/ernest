@@ -5,7 +5,7 @@ import uuid
 import requests
 
 from flask import (Flask, request, make_response, abort, jsonify,
-                   send_file, json)
+                   send_file, session, json)
 from flask.views import MethodView
 from flask.ext.cache import Cache
 from flask.ext.sqlalchemy import SQLAlchemy
@@ -88,6 +88,7 @@ class ExtensibleJSONEncoder(json.JSONEncoder):
 
 app.json_encoder = ExtensibleJSONEncoder
 
+
 # ----------------------------------------
 # Models
 # ----------------------------------------
@@ -167,33 +168,6 @@ class Sprint(db.Model):
 
 
 # ----------------------------------------
-# Cache stuff
-# ----------------------------------------
-
-if app.config.get('CACHE_TYPE', None) is None:
-    app.config['CACHE_TYPE'] = 'simple'
-
-print 'CACHE_TYPE set to "{0}"'.format(app.config['CACHE_TYPE'])
-
-app.cache = Cache(app)
-
-
-def cache_set(key, value, *args, **options):
-    if isinstance(value, (dict, list, bool)):
-        value = json.dumps(value)
-    app.cache.set(key, value, *args, **options)
-
-
-def cache_get(key, default=None):
-    value = app.cache.get(key)
-    if value is None:
-        value = default
-    if value is not None and not isinstance(value, (dict, list, bool)):
-        value = json.loads(value)
-    return value
-
-
-# ----------------------------------------
 # Template stuff
 # ----------------------------------------
 
@@ -246,7 +220,7 @@ class ProjectSprintListView(MethodView):
                    .all())
 
         return jsonify({
-            'is_admin': is_admin(request.cookies.get('username'), project),
+            'is_admin': is_admin(session.get('username'), project),
             'project': project,
             'sprints': sprints
         })
@@ -255,7 +229,7 @@ class ProjectSprintListView(MethodView):
         """This creates a new sprint."""
         proj = db.session.query(Project).filter_by(slug=projectslug).one()
 
-        if not is_admin(request.cookies.get('username'), proj):
+        if not is_admin(session.get('username'), proj):
             # This is bad since this is probably JSON.
             abort(403)
 
@@ -293,8 +267,9 @@ class ProjectSprintView(MethodView):
                     next_sprint = sprints[i+1]
                 break
 
-        token = request.cookies.get('token')
-        my_email = request.cookies.get('username')
+        bugzilla_userid = session.get('Bugzilla_login')
+        bugzilla_cookie = session.get('Bugzilla_logincookie')
+        my_email = session.get('username')
         changed_after = request.args.get('since')
 
         components = [
@@ -318,11 +293,12 @@ class ProjectSprintView(MethodView):
             ),
             components=components,
             sprint=sprint.name,
-            token=token,
+            userid=bugzilla_userid,
+            cookie=bugzilla_cookie,
             changed_after=changed_after,
         )
 
-        bugs = bz.mark_is_blocked(bug_data['bugs'], token)
+        bugs = bz.mark_is_blocked(bug_data['bugs'], bugzilla_userid, bugzilla_cookie)
         total_bugs = len(bugs)
         closed_bugs = 0
         total_points = 0
@@ -435,18 +411,22 @@ class ProjectSprintView(MethodView):
 
 class LogoutView(MethodView):
     def post(self):
-        cookie_token = str(request.cookies.get('token'))
+        session.pop('Bugzilla_login')
+        session.pop('Bugzilla_logincookie')
+        session.pop('username')
+
         response = make_response('logout')
-        response.set_cookie('token', '', expires=0)
+
+        # Make sure to nix the cookie that indicates we're logged in
+        # to the client.
         response.set_cookie('username', '', expires=0)
-        # delete from cache too
-        token_cache_key = 'token:%s' % cookie_token
-        app.cache.delete(token_cache_key)
         return response
 
 
 class LoginView(MethodView):
     def post(self):
+        # Get the POST data credentials and log into Bugzilla
+        # via the login url
         json_data = request.get_json(force=True)
         login_payload = {
             'Bugzilla_login': json_data['login'],
@@ -454,29 +434,26 @@ class LoginView(MethodView):
             'Bugzilla_remember': 'on',
             'GoAheadAndLogIn': 'Log in'
         }
-        login_response = {}
         r = requests.post(app.config['BUGZILLA_LOGIN_URL'],
                           data=login_payload)
         cookies = requests.utils.dict_from_cookiejar(r.cookies)
-        if 'Bugzilla_login' in cookies:
-            token = str(uuid.uuid4())
-            token_cache_key = 'auth:%s' % token
-            cache_set(token_cache_key, {
-                'Bugzilla_login': cookies['Bugzilla_login'],
-                'Bugzilla_logincookie': cookies['Bugzilla_logincookie'],
-                'username': json_data['login']
-            }, MONTH)
-            login_response['result'] = 'success'
-            login_response['token'] = token
-            response = make_response(jsonify(login_response))
-            response.set_cookie('token', token)
-            response.set_cookie('username', json_data['login'])
-            return response
-        else:
+
+        # Pull out the data from the response and stick it in our
+        # session.
+        if not 'Bugzilla_login' in cookies:
             abort(401, "Either your username or password was incorrect")
-            login_response['result'] = 'failed'
-            response = make_response(jsonify(login_response))
-            return response
+            return make_response(jsonify({'result': 'failed'}))
+
+        session['Bugzilla_login'] = cookies['Bugzilla_login']
+        session['Bugzilla_logincookie'] = cookies['Bugzilla_logincookie']
+        session['username'] = json_data['login']
+
+        response = make_response(jsonify({'result': 'success'}))
+
+        # We put the username into a cookie that can be accessed by JS
+        # so that the client knows we're logged in.
+        response.set_cookie('username', json_data['login'])
+        return response
 
 
 @app.route('/')
@@ -495,7 +472,8 @@ def static_stuff(start=None, path=None):
 # don't know what to do with this.
 @app.route('/api/<path:path>', methods=['GET', 'POST', 'PUT', 'DELETE'])
 def api_proxy(path):
-    return BugzillaTracker(app).bugzilla_api(path, request)
+    return BugzillaTracker(app).bugzilla_api(
+        path, request, session.get('Bugzilla_login'), session.get('Bugzilla_logincookie'))
 
 
 # Special rule for old browsers to correctly handle favicon.

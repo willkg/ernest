@@ -43,20 +43,15 @@ class BugzillaTracker(object):
 
         return wb_data
 
-    def augment_with_auth(self, request_arguments, token):
-        user_cache_key = 'auth:%s' % token
-        user_info = self.app.cache.get(user_cache_key)
-        if user_info:
-            user_info = json.loads(user_info)
-            request_arguments['userid'] = user_info['Bugzilla_login']
-            request_arguments['cookie'] = user_info['Bugzilla_logincookie']
+    def augment_with_auth(self, request_arguments, userid, cookie):
+        if userid and cookie:
+            request_arguments['userid'] = userid
+            request_arguments['cookie'] = cookie
 
-    def bugzilla_api(self, path, request):
+    def bugzilla_api(self, path, request, userid=None, cookie=None):
         path = str(path)
         request_arguments = dict(request.args)
-        # str() because it's a Cookie Morsel
-        token = str(request.cookies.get('token'))
-        self.augment_with_auth(request_arguments, token)
+        self.augment_with_auth(request_arguments, userid, cookie)
         r = requests.request(
             request.method,
             self.bzurl + '/{0}'.format(path),
@@ -69,7 +64,7 @@ class BugzillaTracker(object):
     def is_closed(self, status):
         return status.lower() in ('resolved', 'verified')
 
-    def mark_is_blocked(self, bugs, token=None):
+    def mark_is_blocked(self, bugs, userid=None, cookie=None):
         """Adds 'is_blocked' to all bugs
 
         Goes through the bugs and generates a set of bug ids from the
@@ -80,7 +75,8 @@ class BugzillaTracker(object):
         with at most one additional Bugzilla API request.
 
         :arg bugs: The list of bugs to operate on
-        :arg token: The bugzilla session token (optional)
+        :arg userid: (Optional) Bugzilla username
+        :arg cookie: (Optional) Bugzilla cookie for userid
 
         :returns: The bugs with the 'is_blocked' field set to True or
             False
@@ -108,7 +104,8 @@ class BugzillaTracker(object):
 
         blocker_bugs = self._fetch_bugs(
             ids=list(blockers),
-            token=token,
+            userid=userid,
+            cookie=cookie,
             fields=('id', 'status'))
 
         for bug in blocker_bugs['bugs']:
@@ -133,7 +130,8 @@ class BugzillaTracker(object):
         return bugs
 
     def fetch_bugs(self, fields, components=None, sprint=None,
-                   token=None, bucket_requests=3, changed_after=None):
+                   userid=None, cookie=None, bucket_requests=3,
+                   changed_after=None):
 
         combined = collections.defaultdict(list)
         for i in range(0, len(components), bucket_requests):
@@ -142,7 +140,8 @@ class BugzillaTracker(object):
                 components=some_components,
                 sprint=sprint,
                 fields=fields,
-                token=token,
+                userid=userid,
+                cookie=cookie,
                 changed_after=changed_after
             )
             for key in bug_data:
@@ -165,12 +164,13 @@ class BugzillaTracker(object):
 
         return combined
 
-    def fetch_bug(self, id_, token=None, refresh=False, fields=None):
+    def fetch_bug(self, id_, userid=None, cookie=None, refresh=False,
+                  fields=None):
         # @refresh is currently not implemented
-        return self._fetch_bugs(ids=[id_], token=token, fields=fields)
+        return self._fetch_bugs(ids=[id_], userid=userid, cookie=cookie, fields=fields)
 
     def _fetch_bugs(self, ids=None, components=None, sprint=None, fields=None,
-                    token=None, changed_after=None):
+                    userid=None, cookie=None, changed_after=None):
         params = {}
 
         if fields:
@@ -186,8 +186,7 @@ class BugzillaTracker(object):
             params['whiteboard'] = 's=' + sprint
             params['whiteboard_type'] = 'contains'
 
-        if token:
-            self.augment_with_auth(params, token)
+        self.augment_with_auth(params, userid, cookie)
 
         if changed_after:
             params['changed_after'] = changed_after

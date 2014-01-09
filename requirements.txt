@@ -6,10 +6,6 @@ Flask-SSLify==0.1.4
 alembic==0.6.0
 pytz==2013.6
 requests==2.0.0
-python-memcached==1.53
-
-# For better cache api
-flask-cache
 
 # For heroku hosting
 gunicorn

@@ -24,6 +24,11 @@ th {
     width: 100%;
 }
 
+#bug-table tr {
+    /* Tables are weird. This is equivalent to min-height, because a table always stretches. */
+    height: 48px;
+}
+
 #bug-table tr.closed > td,
 #bug-table tr.closed > td {
     background-color: #dff0d8;

@@ -411,9 +411,9 @@ class ProjectSprintView(MethodView):
 
 class LogoutView(MethodView):
     def post(self):
-        session.pop('Bugzilla_login')
-        session.pop('Bugzilla_logincookie')
-        session.pop('username')
+        session.pop('Bugzilla_login', None)
+        session.pop('Bugzilla_logincookie', None)
+        session.pop('username', None)
 
         response = make_response('logout')
 

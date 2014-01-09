@@ -36,6 +36,10 @@ Install and configure
    You can see which settings are editable/overrideable in
    ``ernest/settings.py``.
 
+   Note: You **MUST** provide a SECRET_KEY either in
+   ``settings_local.py`` or in the environment.  No secret key--no
+   soup!
+
 6. Create the database and give it the alembic stamp::
 
        $ python manage.py db_create

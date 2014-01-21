@@ -209,7 +209,7 @@ class ProjectListView(MethodView):
         })
 
 
-class ProjectSprintListView(MethodView):
+class ProjectDetailsView(MethodView):
     def get(self, projectslug):
         # FIXME - this can raise an error
         project = db.session.query(Project).filter_by(slug=projectslug).one()
@@ -220,8 +220,48 @@ class ProjectSprintListView(MethodView):
                    .order_by(Sprint.name)
                    .all())
 
+        bugzilla_userid = session.get('Bugzilla_login')
+        bugzilla_cookie = session.get('Bugzilla_logincookie')
+
+        components = [
+            {'product': project.name, 'component': '__ANY__'}
+        ]
+
+        bz = BugzillaTracker(app)
+        bug_data = bz.fetch_bugs(
+            fields=(
+                'id',
+                'priority',
+                'summary',
+                'last_change_time',
+                'depends_on',
+                'target_milestone',
+            ),
+            components=components,
+            summary='[tracker]',
+            userid=bugzilla_userid,
+            cookie=bugzilla_cookie,
+            status=['UNCONFIRMED', 'NEW', 'ASSIGNED', 'REOPENED'],
+        )
+
+        trackers = bug_data['bugs']
+        for bug in trackers:
+            bug['needinfo'] = []
+
+            for flag in bug.get('flags', []):
+                if flag['name'] == 'needinfo':
+                    needinfo_requestee = flag['requestee']['name']
+                    if '@' in needinfo_requestee:
+                        needinfo_requestee = needinfo_requestee.split('@')[0]
+                    bug['needinfo'].append({
+                        'username': needinfo_requestee,
+                        'name': flag['requestee']['name']
+                    })
+                # FIXME - are there other flags we're interested in?
+
         return jsonify({
             'is_admin': is_admin(session.get('username'), project),
+            'trackers': trackers,
             'project': project,
             'sprints': sprints
         })
@@ -497,7 +537,7 @@ app.add_url_rule(
     view_func=ProjectSprintView.as_view('project-sprint'))
 app.add_url_rule(
     '/api/project/<projectslug>',
-    view_func=ProjectSprintListView.as_view('project-sprint-list'))
+    view_func=ProjectDetailsView.as_view('project-details'))
 app.add_url_rule(
     '/api/project',
     view_func=ProjectListView.as_view('project-list'))

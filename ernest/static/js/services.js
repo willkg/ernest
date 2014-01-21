@@ -68,6 +68,9 @@ ernest.factory('Api', ['$resource',
             if (data.project) {
                 data.project = augmentProject(data.project);
             }
+	    if (data.trackers) {
+		data.trackers = data.trackers.map(augmentBug);
+	    }
             if (data.sprints) {
                 data.sprints = data.sprints.map(augmentSprint.bind(null, data.project));
             }

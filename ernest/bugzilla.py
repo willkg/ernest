@@ -5,6 +5,29 @@ import re
 import requests
 
 
+def show_me_the_logs():
+    """Turns on debug-level logging in requests
+
+    This helps to find out wtf is going wrong.
+
+    """
+    import httplib
+    httplib.HTTPConnection.debuglevel = 1
+
+    import logging
+    # you need to initialize logging, otherwise you will not see
+    # anything from requests
+    logging.basicConfig()
+    logging.getLogger().setLevel(logging.DEBUG)
+
+    requests_log = logging.getLogger("requests.packages.urllib3")
+    requests_log.setLevel(logging.DEBUG)
+    requests_log.propagate = True
+
+# Uncomment this line to get better logging from requests.
+# show_me_the_logs()
+
+
 WHITEBOARD_SPRINT_RE = re.compile(
     r'u=(?P<user>[^\s]*) '
     r'c=(?P<component>[^\s]*) '
@@ -130,8 +153,8 @@ class BugzillaTracker(object):
         return bugs
 
     def fetch_bugs(self, fields, components=None, sprint=None,
-                   userid=None, cookie=None, bucket_requests=3,
-                   changed_after=None):
+                   userid=None, cookie=None, changed_after=None,
+                   summary=None, status=None, bucket_requests=3):
 
         combined = collections.defaultdict(list)
         for i in range(0, len(components), bucket_requests):
@@ -142,7 +165,9 @@ class BugzillaTracker(object):
                 fields=fields,
                 userid=userid,
                 cookie=cookie,
-                changed_after=changed_after
+                changed_after=changed_after,
+                summary=summary,
+                status=status,
             )
             for key in bug_data:
                 if key == 'bugs' and changed_after:
@@ -174,7 +199,8 @@ class BugzillaTracker(object):
                                 fields=fields)
 
     def _fetch_bugs(self, ids=None, components=None, sprint=None, fields=None,
-                    userid=None, cookie=None, changed_after=None):
+                    userid=None, cookie=None, changed_after=None, summary=None,
+                    status=None):
         params = {}
 
         if fields:
@@ -189,6 +215,13 @@ class BugzillaTracker(object):
         if sprint:
             params['whiteboard'] = 's=' + sprint
             params['whiteboard_type'] = 'contains'
+
+        if summary:
+            params['summary'] = summary
+            params['summary_type'] = 'contains'
+
+        if status:
+            params['status'] = status
 
         self.augment_with_auth(params, userid, cookie)
 

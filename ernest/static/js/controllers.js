@@ -22,6 +22,31 @@ ernest.controller('ProjectListCtrl', ['$scope', 'Api',
 
 ernest.controller('ProjectDetailCtrl', ['$scope', '$routeParams', '$cacheFactory', 'Api',
     function($scope, $routeParams, $cacheFactory, Api) {
+        $scope.bugSortBy = {key: 'target_milestone', reverse: true};
+        $scope.bugSort = function(bug) {
+            var val = bug[$scope.bugSortBy.key];
+	    if ($scope.bugSortBy.key === 'target_milestone') {
+		if (val === '---' || val === 'Future') {
+		    val = '\0';
+		} else {
+		    // Sorting by target milestone is actually target
+		    // milestone then priority
+		    val = bug.target_milestone + '::' + bug.priority;
+		}
+            } else if ($scope.bugSortBy.key === 'priority' && val === '--') {
+                val = 'P6';
+            } else if ($scope.bugSortBy.key === 'assigned_to') {
+                if (bug.mine) {
+                    // '\0' aka the null character will be sorted before
+                    // anything else. It's kind of like -Infinity for strings.
+                    val = '\0';
+                } else {
+                    val = val.real_name;
+                }
+            }
+            return val;
+        };
+
         function getData() {
             $scope.$emit('loading+');
 
@@ -29,6 +54,7 @@ ernest.controller('ProjectDetailCtrl', ['$scope', '$routeParams', '$cacheFactory
                 $scope.project = data.project;
                 $scope.sprints = data.sprints;
                 $scope.is_admin = data.is_admin;
+		$scope.trackers = data.trackers;
 
                 $scope.$emit('loading-');
             });

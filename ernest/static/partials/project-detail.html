@@ -9,4 +9,61 @@
   <div ng-show="is_admin">
     <div ng-include="'/partials/sprint-new.html'"></div>
   </div>
+
+  <h1>Trackers for {{project.name}}</h1>
+  <table id="bug-table" class="table-striped table-condensed">
+    <tr>
+      <th class="id">
+        ID
+        <sort-toggle name="bugSortBy" value="id" />
+      </th>
+      <th class="target_milestone">
+        Milestone
+        <sort-toggle name="bugSortBy" value="target_milestone" />
+      </th>
+      <th class="priority">
+        Pri
+        <sort-toggle name="bugSortBy" value="priority" />
+      </th>
+      <th class="summary">
+        Summary
+        <sort-toggle name="bugSortBy" value="summary" />
+      </th>
+      <th class="updated">
+        Last updated
+        <sort-toggle name="bugSortBy" value="last_change_time" />
+      </th>
+    </tr>
+
+    <tr class="bug-row" ng-repeat="bug in trackers | orderBy:bugSort:bugSortBy.reverse">
+      <td class="id">
+        <a ng-href="{{bug.url}}">{{bug.id}}</a>
+      </td>
+      <td class="target_milestone">
+	{{bug.target_milestone}}
+      </td>
+      <td class="priority">
+        {{bug.priority}}
+      </td>
+      <td class="summary">
+        <span class="label label-important" ng-show="bug.securitygroup">SECURE</span>
+        <span class="label label-important" ng-show="bug.confidential">CONFIDENTIAL</span>
+        <span class="label label-warning" ng-show="bug.needinfo">
+          NEEDSINFO
+          <span ng-repeat="person in bug.needinfo">{{person.username}} </span>
+        </span>
+        <span class="label label-important" ng-show="bug.is_blocked">
+          BLOCKED
+          <a ng-repeat="blocker in bug.open_blockers" ng-href="{{blocker.url}}">{{blocker.id}}</a>
+        </span>
+        <span class="muted">{{bug.component}}</span>
+        {{bug.summary}}
+        <span class="label" ng-repeat="flag in bug.whiteboardflags">{{flag}}</span>
+      </td>
+      <td class="updated">
+        {{bug.last_change_time|date:"M-d-yyyy H:mm"}}
+      </td>
+    </tr>
+  </table>
+
 </div>

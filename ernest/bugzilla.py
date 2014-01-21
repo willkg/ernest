@@ -146,14 +146,17 @@ class BugzillaTracker(object):
             )
             for key in bug_data:
                 if key == 'bugs' and changed_after:
-                    # For some ungodly reason, even if you pass `changed_after`
-                    # into the bugzilla API you sometimes get bugs that were last
-                    # updated BEFORE the `changed_after` parameter specifies.
-                    # We suspect this is due to certain changes not incrementing
-                    # the `last_change_time` on the bug. E.g. whiteboard changes.
-                    # Also, the `changed_after` parameter does a:
-                    # `last_change_time >= :changed_after` operation but we only
-                    # want those that are greater than `:changed_after`.
+                    # For some ungodly reason, even if you pass
+                    # `changed_after` into the bugzilla API you
+                    # sometimes get bugs that were last updated BEFORE
+                    # the `changed_after` parameter specifies.  We
+                    # suspect this is due to certain changes not
+                    # incrementing the `last_change_time` on the
+                    # bug. E.g. whiteboard changes.  Also, the
+                    # `changed_after` parameter does a:
+                    # `last_change_time >= :changed_after` operation
+                    # but we only want those that are greater than
+                    # `:changed_after`.
                     bugs = [
                         bug for bug in bug_data[key]
                         if bug['last_change_time'] > changed_after
@@ -167,7 +170,8 @@ class BugzillaTracker(object):
     def fetch_bug(self, id_, userid=None, cookie=None, refresh=False,
                   fields=None):
         # @refresh is currently not implemented
-        return self._fetch_bugs(ids=[id_], userid=userid, cookie=cookie, fields=fields)
+        return self._fetch_bugs(ids=[id_], userid=userid, cookie=cookie,
+                                fields=fields)
 
     def _fetch_bugs(self, ids=None, components=None, sprint=None, fields=None,
                     userid=None, cookie=None, changed_after=None):

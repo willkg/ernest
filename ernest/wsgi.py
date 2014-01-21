@@ -1,1 +1,1 @@
-from ernest.main import app
+from ernest.main import app  # noqa

@@ -1,13 +1,11 @@
 import os
 import re
-import uuid
 
 import requests
 
 from flask import (Flask, request, make_response, abort, jsonify,
                    send_file, session, json)
 from flask.views import MethodView
-from flask.ext.cache import Cache
 from flask.ext.sqlalchemy import SQLAlchemy
 
 from flask_sslify import SSLify
@@ -119,8 +117,8 @@ class ProjectAdmin(db.Model):
     account = db.Column(db.String(100))
 
     project_id = db.Column(db.Integer, db.ForeignKey('project.id'))
-    project = db.relationship('Project',
-        backref=db.backref('admin', lazy='dynamic'))
+    project = db.relationship(
+        'Project', backref=db.backref('admin', lazy='dynamic'))
 
     def __init__(self, project_id, account):
         self.project_id = project_id
@@ -140,8 +138,8 @@ class Sprint(db.Model):
     postmortem = db.Column(db.Text)
 
     project_id = db.Column(db.Integer, db.ForeignKey('project.id'))
-    project = db.relationship('Project',
-        backref=db.backref('sprints', lazy='dynamic'))
+    project = db.relationship(
+        'Project', backref=db.backref('sprints', lazy='dynamic'))
 
     __table_args__ = (
         db.UniqueConstraint('project_id', 'name', name='_project_sprint_uc'),
@@ -186,7 +184,10 @@ def basecontext():
 
 def is_admin(username, project):
     try:
-        db.session.query(ProjectAdmin).filter_by(account=username, project_id=project.id).one()
+        (db.session
+         .query(ProjectAdmin)
+         .filter_by(account=username, project_id=project.id)
+         .one())
         return True
     except NoResultFound:
         return False
@@ -298,7 +299,8 @@ class ProjectSprintView(MethodView):
             changed_after=changed_after,
         )
 
-        bugs = bz.mark_is_blocked(bug_data['bugs'], bugzilla_userid, bugzilla_cookie)
+        bugs = bz.mark_is_blocked(
+            bug_data['bugs'], bugzilla_userid, bugzilla_cookie)
         total_bugs = len(bugs)
         closed_bugs = 0
         total_points = 0
@@ -360,9 +362,12 @@ class ProjectSprintView(MethodView):
                     closed_points += bug['points']
                     closed_bugs += 1
 
-            priority_breakdown[bug['priority']] = priority_breakdown.get(bug['priority'], 0) + 1
-            points_breakdown[bug['points']] = points_breakdown.get(bug['points'], 0) + 1
-            component_breakdown[bug['component']] = component_breakdown.get(bug['component'], 0) + 1
+            priority_breakdown[bug['priority']] = (
+                priority_breakdown.get(bug['priority'], 0) + 1)
+            points_breakdown[bug['points']] = (
+                points_breakdown.get(bug['points'], 0) + 1)
+            component_breakdown[bug['component']] = (
+                component_breakdown.get(bug['component'], 0) + 1)
 
             bug['whiteboardflags'] = wb_data['flags']
 
@@ -473,7 +478,10 @@ def static_stuff(start=None, path=None):
 @app.route('/api/<path:path>', methods=['GET', 'POST', 'PUT', 'DELETE'])
 def api_proxy(path):
     return BugzillaTracker(app).bugzilla_api(
-        path, request, session.get('Bugzilla_login'), session.get('Bugzilla_logincookie'))
+        path,
+        request,
+        session.get('Bugzilla_login'),
+        session.get('Bugzilla_logincookie'))
 
 
 # Special rule for old browsers to correctly handle favicon.
@@ -484,12 +492,15 @@ def favicon():
         mimetype='image/vnd.microsoft.icon')
 
 
-app.add_url_rule('/api/project/<projectslug>/<sprintslug>',
-                 view_func=ProjectSprintView.as_view('project-sprint'))
-app.add_url_rule('/api/project/<projectslug>',
-                 view_func=ProjectSprintListView.as_view('project-sprint-list'))
-app.add_url_rule('/api/project',
-                 view_func=ProjectListView.as_view('project-list'))
+app.add_url_rule(
+    '/api/project/<projectslug>/<sprintslug>',
+    view_func=ProjectSprintView.as_view('project-sprint'))
+app.add_url_rule(
+    '/api/project/<projectslug>',
+    view_func=ProjectSprintListView.as_view('project-sprint-list'))
+app.add_url_rule(
+    '/api/project',
+    view_func=ProjectListView.as_view('project-list'))
 
 app.add_url_rule('/api/logout', view_func=LogoutView.as_view('logout'))
 app.add_url_rule('/api/login', view_func=LoginView.as_view('login'))

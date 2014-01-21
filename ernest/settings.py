@@ -47,6 +47,6 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 # This imports settings_local.py thus everything in that file
 # overrides what's in this file.
 try:
-    from ernest.settings_local import *
+    from ernest.settings_local import *  # noqa
 except ImportError:
     pass

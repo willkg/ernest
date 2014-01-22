@@ -25,14 +25,14 @@ ernest.controller('ProjectDetailCtrl', ['$scope', '$routeParams', '$cacheFactory
         $scope.bugSortBy = {key: 'target_milestone', reverse: true};
         $scope.bugSort = function(bug) {
             var val = bug[$scope.bugSortBy.key];
-	    if ($scope.bugSortBy.key === 'target_milestone') {
-		if (val === '---' || val === 'Future') {
-		    val = '\0';
-		} else {
-		    // Sorting by target milestone is actually target
-		    // milestone then priority
-		    val = bug.target_milestone + '::' + bug.priority;
-		}
+            if ($scope.bugSortBy.key === 'target_milestone') {
+                if (val === '---' || val === 'Future') {
+                    val = '\0';
+                } else {
+                    // Sorting by target milestone is actually target
+                    // milestone then priority
+                    val = bug.target_milestone + '::' + bug.priority;
+                }
             } else if ($scope.bugSortBy.key === 'priority' && val === '--') {
                 val = 'P6';
             } else if ($scope.bugSortBy.key === 'assigned_to') {
@@ -54,7 +54,7 @@ ernest.controller('ProjectDetailCtrl', ['$scope', '$routeParams', '$cacheFactory
                 $scope.project = data.project;
                 $scope.sprints = data.sprints;
                 $scope.is_admin = data.is_admin;
-		$scope.trackers = data.trackers;
+                $scope.trackers = data.trackers;
 
                 $scope.$emit('loading-');
             });
@@ -162,6 +162,8 @@ ernest.controller('SprintDetailCtrl', ['$scope', '$routeParams', '$cacheFactory'
             var p = Api.get($routeParams).$promise.then(function(data) {
                 $scope.$emit('loading-');
 
+                $scope.project = data.project;
+
                 $scope.allBugs = data.bugs;
                 $scope.openBugs = data.bugs.filter(function(bug) {
                     return (bug.status !== 'VERIFIED' && bug.status !== 'RESOLVED');
@@ -198,6 +200,67 @@ ernest.controller('SprintDetailCtrl', ['$scope', '$routeParams', '$cacheFactory'
                 } else {
                     $scope.completionState = 'incomplete';
                 }
+            });
+            return p;
+        }
+
+        getData();
+    }
+]);
+
+ernest.controller('BugzillaDetailCtrl', ['$scope', '$routeParams', '$cacheFactory', 'BugApi',
+    function($scope, $routeParams, $cacheFactory, BugApi) {
+        $scope.bugSortBy = {key: 'priority', reverse: false};
+        $scope.bugSort = function(bug) {
+            var val = bug[$scope.bugSortBy.key];
+            if ($scope.bugSortBy.key === 'priority' && val === '--') {
+                val = 'P6';
+            } else if ($scope.bugSortBy.key === 'assigned_to') {
+                if (bug.mine) {
+                    // '\0' aka the null character will be sorted before
+                    // anything else. It's kind of like -Infinity for strings.
+                    val = '\0';
+                } else {
+                    val = val.real_name;
+                }
+            }
+            return val;
+        };
+
+        $scope.isClosed = function(val) {
+            // Bugs are "closed" if they're either resolved or
+            // verified.
+            return (val.toLowerCase() === 'resolved'
+                    || val.toLowerCase() === 'verified');
+        };
+
+        $scope.isEstimated = function(val) {
+            // Points field can be a number or null. Numbers indicate
+            // it was estimated and null indicates it hasn't been
+            // estimated.
+            return val != null;
+        };
+
+        $scope.refresh = function() {
+            var bug = $scope.bug;
+            if (!bug) {
+                return;
+            }
+            var url = '/api/bugzilla/bug/' + bug.id;
+            $cacheFactory.get('$http').remove(url);
+            return getData();
+        };
+
+        $scope.$on('login', function() { $scope.refresh(); });
+        $scope.$on('logout', function() { $scope.refresh(); });
+
+        function getData() {
+            $scope.$emit('loading+');
+
+            var p = BugApi.get($routeParams).$promise.then(function(data) {
+                $scope.$emit('loading-');
+
+                $scope.bug = data.bug;
             });
             return p;
         }

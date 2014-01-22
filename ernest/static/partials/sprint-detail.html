@@ -1,4 +1,11 @@
 <div id="content">
+  <ul class="breadcrumb">
+    <li><a ng-href="/">Home</a> <span class="divider">/</span></li>
+    <li><a ng-href="/projects">Projects</a> <span class="divider">/</span></li>
+    <li><a ng-href="/projects/{{project.name}}">{{project.name}}</a> <span class="divider">/</span></li>
+    <li class="active">{{sprint.name}}</li>
+  </ul>
+
   <div class="row">
     <div class="span6">
       <span class="pull-left" ng-show="prev_sprint">

@@ -22,11 +22,15 @@ ernest.config(['$routeProvider', '$locationProvider',
         });
         $routeProvider.when('/project/:projSlug', {
             templateUrl: '/partials/project-detail.html',
-            controller: 'ProjectDetailCtrl',
+            controller: 'ProjectDetailCtrl'
         });
         $routeProvider.when('/project/:projSlug/:sprintSlug', {
             templateUrl: '/partials/sprint-detail.html',
-            controller: 'SprintDetailCtrl',
+            controller: 'SprintDetailCtrl'
+        });
+        $routeProvider.when('/bugzilla/bug/:bugId', {
+            templateUrl: '/partials/bug-detail.html',
+            controller: 'BugzillaDetailCtrl'
         });
         $routeProvider.otherwise({
             redirectTo: '/'

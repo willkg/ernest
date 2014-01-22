@@ -243,3 +243,20 @@ class BugzillaTracker(object):
             raise BugzillaError(r.text)
 
         return json.loads(r.text)
+
+    def fetch_comments(self, bugid, userid=None, cookie=None):
+        params = {}
+        self.augment_with_auth(params, userid, cookie)
+
+        url = '{0}/bug/{1}/comment'.format(self.bzurl, bugid)
+
+        r = requests.request(
+            'GET',
+            url,
+            params=params,
+            timeout=60.0
+        )
+        if r.status_code != 200:
+            raise BugzillaError(r.text)
+
+        return json.loads(r.text)

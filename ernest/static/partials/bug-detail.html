@@ -1,0 +1,156 @@
+<div id="content">
+  <ul class="breadcrumb">
+    <li><a ng-href="/">Home</a> <span class="divider">/</span></li>
+    <li><a ng-href="/projects">Projects</a> <span class="divider">/</span></li>
+    <li><a ng-href="/project/{{bug.project_slug}}">{{bug.product}}</a> <span class="divider">/</span></li>
+    <li class="active">{{bug.id}}</li>
+  </ul>
+
+  <h1>
+    <a href="{{bug.url}}">{{bug.id}}</a>: {{bug.summary}}
+  </h1>
+
+  <div class="row">
+    <div class="span6">
+      <dl class="dl-horizontal">
+        <dt>Target milestone</dt>
+        <dd>{{bug.target_milestone}}</dd>
+
+        <dt>Priority</dt>
+        <dd>{{bug.priority}}</dd>
+
+	    <dt>Product</dt>
+	    <dd>{{bug.product}}</dd>
+
+        <dt>Component</dt>
+        <dd>{{bug.component}}</dd>
+
+        <dt>Status</dt>
+        <dd>{{bug.status}}</dd>
+
+        <dt>Whiteboard</dt>
+        <dd>{{bug.whiteboard}}</dd>
+
+        <dt>Assigned to</dt>
+	    <dd>
+          <span ng-show="bug.assigned_to.real_name">
+            {{bug.assigned_to.real_name}}
+          </span>
+	    </dd>
+      </dl>
+    </div>
+
+    <div class="span6">
+      <dl class="dl-horizontal">
+        <dt>Reported</dt>
+        <dd>{{bug.reported|date:"M-d-yyyy H:mm"}}</dd>
+
+        <dt>Last bug change</dt>
+        <dd>{{bug.last_change_time|date:"M-d-yyyy H:mm"}}</dd>
+      </dl>
+    </div>
+  </div>
+
+  <div id="operations" class="container" ng-show="bugs">
+    <div class="btn-toolbar pull-right">
+      <div class="btn-group">
+        <a ng-show="sprint.buglist_open_url" class="btn" href="{{ bug.url }}">Open in Bugzilla</a>
+      </div>
+    </div>
+  </div>
+
+  <h2>Depends on</h2>
+
+  <table id="bug-table" class="table-striped table-condensed">
+    <tr>
+      <th class="id">
+        ID
+        <sort-toggle name="bugSortBy" value="id" />
+      </th>
+      <th class="priority">
+        Pri
+        <sort-toggle name="bugSortBy" value="priority" />
+      </th>
+      <th class="summary">
+        Summary
+        <sort-toggle name="bugSortBy" value="summary" />
+      </th>
+      <th class="assigned">
+        Assigned to
+        <sort-toggle name="bugSortBy" value="assigned_to" />
+      </th>
+      <th class="assigned">
+        Sprint
+        <sort-toggle name="bugSortBy" value="sprint" />
+      </th>
+      <th class="updated">
+        Last updated
+        <sort-toggle name="bugSortBy" value="last_change_time" />
+      </th>
+      <th class="status">
+        Status
+        <sort-toggle name="bugSortBy" value="status" />
+      </th>
+      <th class="points">
+        Pts
+        <sort-toggle name="bugSortBy" value="points" />
+      </th>
+    </tr>
+
+    <tr class="bug-row" ng-class="{mine: subbug.mine, closed: isClosed(subbug.status)}" ng-repeat="subbug in bug.blockers | orderBy:bugSort:bugSortBy.reverse">
+      <td class="id">
+        <span class="keep-whole">
+          <span ng-show="isClosed(subbug.status)"><i class="icon-ok"></i></span>
+          <a ng-href="{{subbug.url}}">{{subbug.id}}</a>
+        </span>
+      </td>
+      <td ng-class="{mine: subbug.mine}" class="priority">
+        {{subbug.priority}}
+      </td>
+      <td class="summary">
+        <span class="label label-important" ng-show="subbug.securitygroup">SECURE</span>
+        <span class="label label-important" ng-show="subbug.confidential">CONFIDENTIAL</span>
+        <span class="label label-warning" ng-show="subbug.needinfo">
+          NEEDSINFO
+          <span ng-repeat="person in subbug.needinfo">{{person.username}} </span>
+        </span>
+        <span class="label label-important" ng-show="subbug.is_blocked">
+          BLOCKED
+          <a ng-repeat="blocker in subbug.open_blockers" ng-href="{{blocker.url}}">{{blocker.id}}</a>
+        </span>
+        <span class="muted">{{subbug.component}}</span>
+        {{subbug.summary}}
+        <span class="label" ng-repeat="flag in subbug.whiteboardflags">{{flag}}</span>
+      </td>
+      <td class="assigned">
+        <span ng-if="subbug.gravatar_url">
+          <img ng-src="{{subbug.gravatar_url}}" />
+        </span>
+        <span ng-show="subbug.assigned_to.real_name">
+          {{subbug.assigned_to.real_name}}
+        </span>
+      </td>
+      <td class="sprint">
+	    {{subbug.sprint}}
+      </td>
+      <td class="updated">
+        {{subbug.last_change_time|date:"M-d-yyyy H:mm"}}
+      </td>
+      <td class="status">
+        {{subbug.status}}
+      </td>
+      <td class="points">
+        <span ng-show="isEstimated(subbug.points)">{{subbug.points}}</span>
+        <span ng-hide="isEstimated(subbug.points)" class="label label-important">None</span>
+      </td>
+    </tr>
+  </table>
+
+  <h2>Comments</h2>
+  <div class="comment" ng-repeat="comment in bug.comments">
+    <div class="muted">
+      {{comment.creator.name}} at {{comment.creation_time|date:"M-d-yyyy H:mm"}}
+    </div>
+    <pre>{{comment.text}}</pre>
+  </div>
+</div>

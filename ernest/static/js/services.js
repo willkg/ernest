@@ -58,6 +58,8 @@ ernest.factory('Api', ['$resource',
                     };
                 });
             }
+            bug.details_url = '/bugzilla/bug/' + bug.id;
+
             return bug;
         }
 
@@ -68,9 +70,9 @@ ernest.factory('Api', ['$resource',
             if (data.project) {
                 data.project = augmentProject(data.project);
             }
-	    if (data.trackers) {
-		data.trackers = data.trackers.map(augmentBug);
-	    }
+            if (data.trackers) {
+                data.trackers = data.trackers.map(augmentBug);
+            }
             if (data.sprints) {
                 data.sprints = data.sprints.map(augmentSprint.bind(null, data.project));
             }
@@ -96,6 +98,54 @@ ernest.factory('Api', ['$resource',
                 transformResponse: [parseJSON, augment],
                 cache: true
             },
+            get: {
+                method: 'GET',
+                isArray: false,
+                transformResponse: [parseJSON, augment],
+                cache: true
+            }
+        });
+    }
+]);
+
+ernest.factory('BugApi', ['$resource',
+    function($resource) {
+
+        function parseJSON(data, headersGetter) {
+            return JSON.parse(data);
+        }
+
+        function bugUrl() {
+            return 'https://bugzilla.mozilla.org/show_bug.cgi?id=' + this.id;
+        }
+
+        function augmentBug(bug) {
+            var baseUrl = 'https://bugzilla.mozilla.org/show_bug.cgi?id=';
+            bug.url = baseUrl + bug.id;
+            if (bug.open_blockers) {
+                bug.open_blockers = bug.open_blockers.map(function(bugId) {
+                    return {
+                        id: bugId,
+                        url: baseUrl + bugId,
+                    };
+                });
+            }
+            bug.details_url = '/bugzilla/bug/' + bug.id;
+
+            return bug;
+        }
+
+        function augment(data, headersGetter) {
+            if (data.bugs) {
+                data.bugs = data.bugs.map(augmentBug);
+            }
+            if (data.bug) {
+                data.bug = augmentBug(data.bug);
+            }
+            return data;
+        }
+
+        return $resource('/api/bugzilla/bug/:bugId', {}, {
             get: {
                 method: 'GET',
                 isArray: false,

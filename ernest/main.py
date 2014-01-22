@@ -454,6 +454,122 @@ class ProjectSprintView(MethodView):
         })
 
 
+class BugzillaBugDetailsView(MethodView):
+    def get(self, bugid):
+        bugzilla_userid = session.get('Bugzilla_login')
+        bugzilla_cookie = session.get('Bugzilla_logincookie')
+        my_email = session.get('username')
+
+        bz = BugzillaTracker(app)
+
+        bug_data = bz.fetch_bug(
+            bugid,
+            userid=bugzilla_userid,
+            cookie=bugzilla_cookie,
+            fields=(
+                'id',
+                'priority',
+                'summary',
+                'status',
+                'whiteboard',
+                'last_change_time',
+                'product',
+                'component',
+                'depends_on',
+                'target_milestone',
+                'flags',
+                'comments',
+                'assigned_to',
+                'reported',
+            ))
+        bug_data = bug_data['bugs'][0]
+
+        if bug_data.get('assigned_to', {})['real_name'].startswith('Nobody'):
+            # This nixes the assigned_to because it's silly long
+            # when no one is assigned to the bug.
+            bug_data['assigned_to'] = {}
+
+        # FIXME - this is gross.
+        bug_data['project_slug'] = slugify(bug_data['product'])
+
+        blocker_bug_ids = bug_data.get('depends_on', [])
+        if blocker_bug_ids:
+            # FIXME: Using "private" methods is goofypants.
+            blocker_bugs = bz._fetch_bugs(
+                ids=blocker_bug_ids,
+                userid=bugzilla_userid,
+                cookie=bugzilla_cookie,
+                fields=(
+                    'id',
+                    'priority',
+                    'summary',
+                    'status',
+                    'whiteboard',
+                    'last_change_time',
+                    'component',
+                    'depends_on',
+                    'flags',
+                    'groups',
+                    'assigned_to',
+                ),
+            )
+
+            for bug in blocker_bugs['bugs']:
+                bug['needinfo'] = []
+                bug['confidentialgroup'] = False
+                bug['securitygroup'] = False
+
+                if bug.get('assigned_to', {})['real_name'].startswith('Nobody'):
+                    # This nixes the assigned_to because it's silly long
+                    # when no one is assigned to the bug.
+                    bug['assigned_to'] = {}
+
+                email = bug.get('assigned_to', {}).get('name')
+                if email and my_email:
+                    bug['gravatar_url'] = gravatar_url(email, 40)
+                else:
+                    bug['gravatar_url'] = False
+
+                if email and email == my_email:
+                    bug['mine'] = True
+                else:
+                    bug['mine'] = False
+
+                for flag in bug.get('flags', []):
+                    if flag['name'] == 'needinfo':
+                        needinfo_requestee = flag['requestee']['name']
+                        if '@' in needinfo_requestee:
+                            needinfo_requestee = needinfo_requestee.split('@')[0]
+                        bug['needinfo'].append({
+                            'username': needinfo_requestee,
+                            'name': flag['requestee']['name']
+                        })
+                    # FIXME - are there other flags we're interested in?
+
+                for group in bug.get('groups', []):
+                    if group['name'] == 'mozilla-corporation-confidential':
+                        bug['confidentialgroup'] = True
+                    elif group['name'] == 'websites-security':
+                        bug['securitygroup'] = True
+
+                # Pick out whiteboard data
+                wb_data = bz.parse_whiteboard(bug.get('whiteboard', ''))
+                bug['sprint'] = wb_data.get('s', None)
+                bug['points'] = wb_data.get('p', None)
+                bug['component'] = wb_data.get('c', None)
+
+            bug_data['blockers'] = blocker_bugs['bugs']
+
+        else:
+            bug_data['blockers'] = []
+
+        # bug_data['comments'] = bz.fetch_comments(bug_data['id'])
+
+        return jsonify({
+            'bug': bug_data,
+        })
+
+
 class LogoutView(MethodView):
     def post(self):
         session.pop('Bugzilla_login', None)
@@ -541,6 +657,9 @@ app.add_url_rule(
 app.add_url_rule(
     '/api/project',
     view_func=ProjectListView.as_view('project-list'))
+app.add_url_rule(
+    '/api/bugzilla/bug/<bugid>',
+    view_func=BugzillaBugDetailsView.as_view('bugzilla-bug-details'))
 
 app.add_url_rule('/api/logout', view_func=LogoutView.as_view('logout'))
 app.add_url_rule('/api/login', view_func=LoginView.as_view('login'))

@@ -40,13 +40,15 @@
         Last updated
         <sort-toggle name="bugSortBy" value="last_change_time" />
       </th>
-      <th class="details">
-      </th>
     </tr>
 
     <tr class="bug-row" ng-repeat="bug in trackers | orderBy:bugSort:bugSortBy.reverse">
       <td class="id">
-        <a ng-href="{{bug.url}}">{{bug.id}}</a>
+        <span class="keep-whole">
+          <a ng-href="{{bug.url}}">{{bug.id}}</a>
+          /
+	      <a href="{{bug.details_url}}">Details</a>
+        </span>
       </td>
       <td class="target_milestone">
 	{{bug.target_milestone}}
@@ -71,9 +73,6 @@
       </td>
       <td class="updated">
         {{bug.last_change_time|date:"M-d-yyyy H:mm"}}
-      </td>
-      <td class="details">
-	    <a href="{{bug.details_url}}">Details</a>
       </td>
     </tr>
   </table>

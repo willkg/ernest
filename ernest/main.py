@@ -356,7 +356,7 @@ class ProjectSprintView(MethodView):
             bug['confidentialgroup'] = False
             bug['securitygroup'] = False
 
-            if bug.get('assigned_to', {})['real_name'].startswith('Nobody'):
+            if bug.get('assigned_to', {}).get('real_name', '').startswith('Nobody'):
                 # This nixes the assigned_to because it's silly long
                 # when no one is assigned to the bug.
                 bug['assigned_to'] = {}

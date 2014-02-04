@@ -122,12 +122,10 @@ ernest.factory('BugApi', ['$resource',
         function augmentBug(bug) {
             var baseUrl = 'https://bugzilla.mozilla.org/show_bug.cgi?id=';
             bug.url = baseUrl + bug.id;
-            if (bug.open_blockers) {
-                bug.open_blockers = bug.open_blockers.map(function(bugId) {
-                    return {
-                        id: bugId,
-                        url: baseUrl + bugId,
-                    };
+            if (bug.blockers) {
+                bug.blockers = bug.blockers.map(function(bug_data) {
+                    bug_data.url = baseUrl + bug_data.id;
+                    return bug_data;
                 });
             }
             bug.details_url = '/bugzilla/bug/' + bug.id;

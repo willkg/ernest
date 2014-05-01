@@ -1,7 +1,7 @@
 var assert = chai.assert;
 
 /* This is almost like the promise that comes from the requests service,
-/* but it runs kind of syncronously in a way that helps tests. */
+   but it runs kind of syncronously in a way that helps tests. */
 function MockRequestPromise() {
     this.callbacks = [];
     this.$promise = this;
@@ -152,7 +152,7 @@ describe('ernest controllers', function() {
 
         it('should emit loading events', function() {
             assert(emitSpy.calledWith('loading+'));
-            mockApi.getDeferred.resolve({sprint: {}, sprints: []});
+            mockApi.getDeferred.resolve(mockData);
             assert(emitSpy.calledWith('loading-'));
         });
 

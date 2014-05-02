@@ -18,9 +18,10 @@
         </ul>
 
         <ul class="nav pull-right" ng-controller="AuthCtrl">
-
           <li ng-show="loggedIn()">
             <span class="navbar-text">{{creds.login}}</span>
+          </li>
+          <li ng-show="loggedIn()">
             <a id="logout-link" href="#" ng-click="logout()">Logout</a>
           </li>
 

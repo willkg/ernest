@@ -8,10 +8,6 @@ ernest.value('version', '0.1a1');
 ernest.factory('Api', ['$resource',
     function($resource) {
 
-        function parseJSON(data, headersGetter) {
-            return JSON.parse(data);
-        }
-
         function bugUrl() {
             return 'https://bugzilla.mozilla.org/show_bug.cgi?id=' + this.id;
         }
@@ -95,14 +91,14 @@ ernest.factory('Api', ['$resource',
             query: {
                 method: 'GET',
                 isArray: false,
-                transformResponse: [parseJSON, augment],
+                transformResponse: [augment],
                 cache: true,
                 responseType: 'json'
             },
             get: {
                 method: 'GET',
                 isArray: false,
-                transformResponse: [parseJSON, augment],
+                transformResponse: [augment],
                 cache: true,
                 responseType: 'json'
             }
@@ -112,10 +108,6 @@ ernest.factory('Api', ['$resource',
 
 ernest.factory('BugApi', ['$resource',
     function($resource) {
-
-        function parseJSON(data, headersGetter) {
-            return JSON.parse(data);
-        }
 
         function bugUrl() {
             return 'https://bugzilla.mozilla.org/show_bug.cgi?id=' + this.id;
@@ -149,7 +141,7 @@ ernest.factory('BugApi', ['$resource',
             get: {
                 method: 'GET',
                 isArray: false,
-                transformResponse: [parseJSON, augment],
+                transformResponse: [augment],
                 cache: true,
                 responseType: 'json'
             }

@@ -96,13 +96,15 @@ ernest.factory('Api', ['$resource',
                 method: 'GET',
                 isArray: false,
                 transformResponse: [parseJSON, augment],
-                cache: true
+                cache: true,
+                responseType: 'json'
             },
             get: {
                 method: 'GET',
                 isArray: false,
                 transformResponse: [parseJSON, augment],
-                cache: true
+                cache: true,
+                responseType: 'json'
             }
         });
     }
@@ -148,7 +150,8 @@ ernest.factory('BugApi', ['$resource',
                 method: 'GET',
                 isArray: false,
                 transformResponse: [parseJSON, augment],
-                cache: true
+                cache: true,
+                responseType: 'json'
             }
         });
     }

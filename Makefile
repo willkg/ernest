@@ -13,3 +13,6 @@ clean-pyc:
 
 lint:
 	flake8 ernest
+
+deploy:
+	git push heroku master

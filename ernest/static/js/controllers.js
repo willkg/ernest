@@ -50,14 +50,19 @@ ernest.controller('ProjectDetailCtrl', ['$scope', '$routeParams', '$cacheFactory
         function getData() {
             $scope.$emit('loading+');
 
-            var p = Api.get($routeParams).$promise.then(function(data) {
-                $scope.project = data.project;
-                $scope.sprints = data.sprints;
-                $scope.is_admin = data.is_admin;
-                $scope.trackers = data.trackers;
+            var p = Api.get($routeParams).$promise.then(
+                function(data) {
+                    $scope.project = data.project;
+                    $scope.sprints = data.sprints;
+                    $scope.is_admin = data.is_admin;
+                    $scope.trackers = data.trackers;
 
-                $scope.$emit('loading-');
-            });
+                    $scope.$emit('loading-');
+                },
+                function(error) {
+                    console.log('ERNEST ERROR: ' + error);
+                    $scope.$emit('loading-');
+                });
             return p;
         }
 
@@ -159,48 +164,55 @@ ernest.controller('SprintDetailCtrl', ['$scope', '$routeParams', '$cacheFactory'
         function getData() {
             $scope.$emit('loading+');
 
-            var p = Api.get($routeParams).$promise.then(function(data) {
-                $scope.$emit('loading-');
+            var p = Api.get($routeParams).$promise.then(
+                function(data) {
+                    $scope.$emit('loading-');
 
-                $scope.project = data.project;
+                    $scope.project = data.project;
 
-                $scope.allBugs = data.bugs;
-                $scope.openBugs = data.bugs.filter(function(bug) {
-                    return (bug.status !== 'VERIFIED' && bug.status !== 'RESOLVED');
+                    $scope.allBugs = data.bugs;
+                    $scope.openBugs = data.bugs.filter(function(bug) {
+                        return (bug.status !== 'VERIFIED' && bug.status !== 'RESOLVED');
+                    });
+
+                    if ($scope.showClosed) {
+                        $scope.bugs = $scope.allBugs;
+                        $scope.show_hide_closed = 'Hide closed';
+                    } else {
+                        $scope.bugs = $scope.openBugs;
+                        $scope.show_hide_closed = 'Show closed';
+                    }
+
+                    $scope.bugs_with_no_points = data.bugs_with_no_points;
+                    $scope.latest_change_time = data.latest_change_time;
+                    $scope.prev_sprint = data.prev_sprint;
+                    $scope.sprint = data.sprint;
+                    $scope.next_sprint = data.next_sprint;
+                    $scope.total_bugs = data.total_bugs;
+                    $scope.closed_bugs = data.closed_bugs;
+                    $scope.total_points = data.total_points;
+                    $scope.closed_points = data.closed_points;
+                    $scope.priority_breakdown = data.priority_breakdown;
+                    $scope.points_breakdown = data.points_breakdown;
+                    $scope.component_breakdown = data.component_breakdown;
+                    $scope.last_load = new Date();
+
+                    if ($scope.bugs_with_no_points > 0) {
+                        $scope.completionState = 'notready';
+                    } else if ($scope.closed_points === $scope.total_points) {
+                        $scope.completionState = 'done';
+                    } else if ($scope.closed_points > $scope.total_points / 2) {
+                        $scope.completionState = 'almost';
+                    } else {
+                        $scope.completionState = 'incomplete';
+                    }
+                },
+                function(error) {
+                    // FIXME - should show an error here
+                    console.log('ERNEST ERROR: ' + error);
+                    $scope.$emit('loading-');
+                    $scope.last_load = new Date();
                 });
-
-                if ($scope.showClosed) {
-                    $scope.bugs = $scope.allBugs;
-                    $scope.show_hide_closed = 'Hide closed';
-                } else {
-                    $scope.bugs = $scope.openBugs;
-                    $scope.show_hide_closed = 'Show closed';
-                }
-
-                $scope.bugs_with_no_points = data.bugs_with_no_points;
-                $scope.latest_change_time = data.latest_change_time;
-                $scope.prev_sprint = data.prev_sprint;
-                $scope.sprint = data.sprint;
-                $scope.next_sprint = data.next_sprint;
-                $scope.total_bugs = data.total_bugs;
-                $scope.closed_bugs = data.closed_bugs;
-                $scope.total_points = data.total_points;
-                $scope.closed_points = data.closed_points;
-                $scope.priority_breakdown = data.priority_breakdown;
-                $scope.points_breakdown = data.points_breakdown;
-                $scope.component_breakdown = data.component_breakdown;
-                $scope.last_load = new Date();
-
-                if ($scope.bugs_with_no_points > 0) {
-                    $scope.completionState = 'notready';
-                } else if ($scope.closed_points === $scope.total_points) {
-                    $scope.completionState = 'done';
-                } else if ($scope.closed_points > $scope.total_points / 2) {
-                    $scope.completionState = 'almost';
-                } else {
-                    $scope.completionState = 'incomplete';
-                }
-            });
             return p;
         }
 

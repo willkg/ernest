@@ -7,15 +7,38 @@
 
   <h1>{{project.name}}</h1>
   <h2>Sprints</h2>
-  <ul>
-    <li ng-repeat="sprint in sprints">
-      <a ng-href="{{sprint.url}}">{{sprint.name}}</a>
-    </li>
-  </ul>
 
   <div ng-show="is_admin">
     <div ng-include="'/partials/sprint-new.html'"></div>
   </div>
+
+  <table id="bug-table" class="table-striped table-condensed">
+    <tr>
+      <th class="name">Name</th>
+      <th class="start">Start date</th>
+      <th class="end">End date</th>
+      <th class="notes">Notes</th>
+      <th class="postmortem">Postmortem</th>
+    </tr>
+
+    <tr class="bug-row" ng-repeat="sprint in sprints | orderBy:'name':true">
+      <td>
+        <a ng-href="{{sprint.url}}">{{sprint.name}}</a>
+      </td>
+      <td>
+        {{sprint.start_date|date:"M-d-yyyy"}}
+      </td>
+      <td>
+        {{sprint.end_date|date:"M-d-yyyy"}}
+      </td>
+      <td>
+        {{sprint.notes}}
+      </td>
+      <td>
+        {{sprint.postmortem}}
+      </td>
+    </tr>
+  </table>
 
   <h2>Trackers</h2>
   <table id="bug-table" class="table-striped table-condensed">

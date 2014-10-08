@@ -14,7 +14,7 @@ from werkzeug.routing import BaseConverter
 
 from .bugzilla import BugzillaTracker
 from .version import VERSION, VERSION_RAW
-from .utils import gravatar_url
+from .utils import gravatar_url, smart_date
 
 
 # ----------------------------------------
@@ -158,8 +158,8 @@ class Sprint(db.Model):
             'id': self.id,
             'name': self.name,
             'slug': self.slug,
-            'start_date': self.start_date,
-            'end_date': self.end_date,
+            'start_date': self.start_date.isoformat() if self.start_date else '',
+            'end_date': self.end_date.isoformat() if self.end_date else '',
             'notes': self.notes,
             'postmortem': self.postmortem,
         }
@@ -455,7 +455,7 @@ class ProjectSprintView(MethodView):
         })
 
     def post(self, projectslug, sprintslug):
-        """This adjusts sprint details."""
+        """Update sprint details."""
         # FIXME - this can raise an error
         proj = db.session.query(Project).filter_by(slug=projectslug).one()
 
@@ -468,6 +468,10 @@ class ProjectSprintView(MethodView):
             abort(403)
 
         json_data = request.get_json(force=True)
+
+        # FIXME: Bad error handling here
+        sprint.start_date = smart_date(json_data.get('start_date', None))
+        sprint.end_date = smart_date(json_data.get('end_date', None))
 
         notes = json_data.get('notes', None)
         if notes is not None:

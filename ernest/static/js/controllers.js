@@ -139,7 +139,12 @@ ernest.controller('SprintDetailCtrl', ['$scope', '$routeParams', '$http', '$cach
             var proj = sprint.project;
             var url = '/api/project/' + proj.slug + '/' + sprint.slug;
 
-            var data = {notes: $scope.sprint.notes, postmortem: $scope.sprint.postmortem};
+            var data = {
+                start_date: sprint.start_date,
+                end_date: sprint.end_date,
+                notes: sprint.notes,
+                postmortem: sprint.postmortem
+            };
 
             $scope.$emit('loading+');
             $http.post(url, data)

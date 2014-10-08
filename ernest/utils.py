@@ -1,3 +1,4 @@
+import datetime
 import hashlib
 import json
 import subprocess
@@ -35,6 +36,16 @@ def truthiness(s):
         return str(s).lower() in ['true', 't', '1']
     except (TypeError, ValueError, UnicodeEncodeError):
         return False
+
+
+def smart_date(text):
+    if text is not None:
+        try:
+            parts = [int(part.lstrip('0')) for part in text.split('-')]
+            return datetime.date(*parts)
+        except Exception:
+            pass
+    return None
 
 
 def gravatar_url(email, size=None):

@@ -39,6 +39,9 @@
 
     <div class="span6">
       <dl class="dl-horizontal">
+        <dt>Duration</dt>
+        <dd>{{sprint.start_date|date:"M-d-yyyy"}} to {{sprint.end_date|date:"M-d-yyyy"}}</dd>
+
         <dt>Last refresh</dt>
         <dd>{{last_load|date:"M-d-yyyy H:mm"}}</dd>
 
@@ -179,11 +182,26 @@
       </table>
     </div>
   </div>
-    <p>Note: It'd be nice if these were pie charts.</p>
+  <p>Note: It'd be nice if these were pie charts.</p>
 
   <div id="sprintnotes">
+    <div class="container">
+      <h3>Notes:</h3>
+      <pre>{{sprint.notes}}</pre>
+      <h3>Post mortem:</h3>
+      <pre>{{sprint.postmortem}}</pre>
+      <p>Note: Project admin can update the notes and postmortem.</p>
+    </div>
+
     <div ng-show="is_admin">
+      <h2>(Admin-only) Edit sprint:</h2>
       <ng-form>
+        <label for="sprintstart">Start date (YYYY-MM-DD):</label>
+        <input name="sprintstart" ng-model="sprint.start_date" placeholder="Start date (YYYY-MM-DD)">
+
+        <label for="sprintend">End date (YYYY-MM-DD):</label>
+        <input name="sprintend" ng-model="sprint.end_date" placeholder="End date (YYYY-MM-DD)">
+
         <label for="sprintnotes">Notes:</label>
         <textarea id="sprintnotes" name="notes" ng-model="sprint.notes"></textarea>
 
@@ -192,13 +210,6 @@
 
         <button type="btn btn-primary" ng-click="updateSprint()">Save</button>
       </ng-form>
-    </div>
-    <div ng-hide="is_admin" class="container">
-      <h3>Notes:</h3>
-      <pre>{{sprint.notes}}</pre>
-      <h3>Post mortem:</h3>
-      <pre>{{sprint.postmortem}}</pre>
-      <p>Note: Project admin can update the notes and postmortem.</p>
     </div>
   </div>
 </div>

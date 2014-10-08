@@ -6,7 +6,11 @@ var ernest = angular.module('ernest', [
     'ngRoute',
     'ngResource',
     'ngCookies',
-]);
+    'LocalStorageModule'
+])
+.config(['localStorageServiceProvider', function (localStorageServiceProvider) {
+    localStorageServiceProvider.setPrefix('ernest');
+}]);
 
 ernest.config(['$routeProvider', '$locationProvider',
     function($routeProvider, $locationProvider) {

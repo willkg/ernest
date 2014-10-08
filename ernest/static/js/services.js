@@ -5,8 +5,8 @@ var ernest = angular.module('ernest');
 // To do: this should pull from the server.
 ernest.value('version', '0.1a1');
 
-ernest.factory('Api', ['$resource',
-    function($resource) {
+ernest.factory('Api', ['$resource', 'localStorageService',
+    function($resource, localStorageService) {
 
         function bugUrl() {
             return 'https://bugzilla.mozilla.org/show_bug.cgi?id=' + this.id;
@@ -55,6 +55,8 @@ ernest.factory('Api', ['$resource',
                 });
             }
             bug.details_url = '/bugzilla/bug/' + bug.id;
+
+            bug.star = localStorageService.get('star' + bug.id) || '0';
 
             return bug;
         }

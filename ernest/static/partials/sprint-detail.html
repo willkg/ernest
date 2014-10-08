@@ -70,6 +70,7 @@
       </div>
       <div class="btn-group">
         <a class="btn" ng-click="changeShowHideClosed()">{{ show_hide_closed }}</a>
+        <a class="btn" ng-click="changeShowHideNonStarred()">{{ show_hide_non_starred }}</a>
         <a class="btn" ng-click="refresh()">Refresh now <i class="icon-refresh"></i></a>
       </div>
     </div>
@@ -77,6 +78,10 @@
 
   <table id="bug-table" class="table-striped table-condensed">
     <tr>
+      <th class="star">
+        Star
+        <sort-toggle name="bugSortBy" value="star" />
+      </th>
       <th class="id">
         ID
         <sort-toggle name="bugSortBy" value="id" />
@@ -107,7 +112,10 @@
       </th>
     </tr>
 
-    <tr class="bug-row" ng-class="{mine: bug.mine, closed: isClosed(bug.status)}" ng-repeat="bug in bugs | orderBy:bugSort:bugSortBy.reverse">
+    <tr class="bug-row" ng-class="{mine: bug.mine, closed: isClosed(bug.status)}" ng-repeat="bug in bugs | filter:bugFilter | orderBy:bugSort:bugSortBy.reverse">
+      <td class="star">
+        <input type="checkbox" ng-model="bug.star" name="star{{bug.id}}" ng-true-value="1" ng-false-value="0"  ng-change="changeStar()">
+      </td>
       <td class="id">
         <span class="keep-whole">
           <span ng-show="isClosed(bug.status)"><i class="icon-ok"></i></span>

@@ -100,9 +100,11 @@ ernest.controller('SprintNewCtrl', ['$scope', '$routeParams', '$http',
     }
 ]);
 
-ernest.controller('SprintDetailCtrl', ['$scope', '$routeParams', '$http', '$cacheFactory', 'Api',
-    function($scope, $routeParams, $http, $cacheFactory, Api) {
+ernest.controller('SprintDetailCtrl', ['$scope', '$routeParams', '$http', '$cacheFactory', 'Api', 'localStorageService',
+    function($scope, $routeParams, $http, $cacheFactory, Api, localStorageService) {
         $scope.showClosed = true;
+        $scope.showNonStarred = true;
+
         $scope.bugSortBy = {key: 'priority', reverse: false};
         $scope.bugSort = function(bug) {
             var val = bug[$scope.bugSortBy.key];
@@ -132,6 +134,16 @@ ernest.controller('SprintDetailCtrl', ['$scope', '$routeParams', '$http', '$cach
             // it was estimated and null indicates it hasn't been
             // estimated.
             return val != null;
+        };
+
+        $scope.bugFilter = function(bug) {
+            if (!$scope.showClosed && $scope.isClosed(bug.status)) {
+                return false;
+            }
+            if (!$scope.showNonStarred && bug.star === '0') {
+                return false;
+            }
+            return true;
         };
 
         $scope.updateSprint = function() {
@@ -174,13 +186,31 @@ ernest.controller('SprintDetailCtrl', ['$scope', '$routeParams', '$http', '$cach
 
         $scope.changeShowHideClosed = function() {
             if ($scope.showClosed) {
-                $scope.bugs = $scope.openBugs;
                 $scope.showClosed = false;
                 $scope.show_hide_closed = 'Show closed';
             } else {
-                $scope.bugs = $scope.allBugs;
                 $scope.showClosed = true;
                 $scope.show_hide_closed = 'Hide closed';
+            }
+        };
+
+        $scope.changeShowHideNonStarred = function() {
+            if ($scope.showNonStarred) {
+                $scope.showNonStarred = false;
+                $scope.show_hide_non_starred = 'Show non-starred';
+            } else {
+                $scope.showNonStarred = true;
+                $scope.show_hide_non_starred = 'Hide non-starred';
+            }
+        };
+
+        $scope.changeStar = function() {
+            var bug = this.bug;
+
+            if (bug.star == '1') {
+                localStorageService.set('star' + bug.id, '1');
+            } else {
+                localStorageService.remove('star' + bug.id);
             }
         };
 
@@ -259,11 +289,15 @@ ernest.controller('SprintDetailCtrl', ['$scope', '$routeParams', '$http', '$cach
                 });
 
             if ($scope.showClosed) {
-                $scope.bugs = $scope.allBugs;
                 $scope.show_hide_closed = 'Hide closed';
             } else {
-                $scope.bugs = $scope.openBugs;
                 $scope.show_hide_closed = 'Show closed';
+            }
+
+            if ($scope.showNonStarred) {
+                $scope.show_hide_non_starred = 'Hide non-starred';
+            } else {
+                $scope.show_hide_non_starred = 'Show non-starred';
             }
 
             return p;

@@ -6,6 +6,7 @@
     <li class="active">{{bug.id}}</li>
   </ul>
 
+  <div class="container" ng-class="{secure: bug.securitygroup, confidential: bug.confidentialgroup}">
   <h1>
     <a href="{{bug.url}}">{{bug.id}}</a>: {{bug.summary}}
   </h1>
@@ -109,7 +110,7 @@
       </td>
       <td class="summary">
         <span class="label label-important" ng-show="subbug.securitygroup">SECURE</span>
-        <span class="label label-important" ng-show="subbug.confidential">CONFIDENTIAL</span>
+        <span class="label label-important" ng-show="subbug.confidentialgroup">CONFIDENTIAL</span>
         <span class="label label-warning" ng-show="subbug.needinfo">
           NEEDSINFO
           <span ng-repeat="person in subbug.needinfo">{{person.username}} </span>

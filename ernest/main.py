@@ -526,6 +526,15 @@ class BugzillaBugDetailsView(MethodView):
         # FIXME - this is gross.
         bug_data['project_slug'] = slugify(bug_data['product'])
 
+        bug_data['confidentialgroup'] = False
+        bug_data['securitygroup'] = False
+
+        for group in bug_data.get('groups', []):
+            if group['name'] == 'mozilla-corporation-confidential':
+                bug_data['confidentialgroup'] = True
+            elif group['name'] == 'websites-security':
+                bug_data['securitygroup'] = True
+
         blocker_bug_ids = bug_data.get('depends_on', [])
         if blocker_bug_ids:
             # FIXME: Using "private" methods is goofypants.

@@ -21,6 +21,13 @@ th {
     white-space: nowrap;
 }
 
+.container.secure,
+.container.confidential {
+    border: 1px solid red;
+    background: #ffdddd;
+    padding: 1em;
+}
+
 #bug-table {
     width: 100%;
 }

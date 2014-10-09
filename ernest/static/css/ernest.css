@@ -30,9 +30,19 @@ th {
     height: 48px;
 }
 
-#bug-table tr.closed > td,
 #bug-table tr.closed > td {
     background-color: #dff0d8;
+}
+
+#bug-table tr.current > td {
+    background-color: #dfdfff;
+}
+#bug-table tr.current td.name:before {
+    content: "»";
+    float: left;
+    font-size: 1.75em;
+    margin-right: -2em;
+    transform: translate(-22px, 0px);
 }
 
 #bug-table tr.mine td.summary:before {

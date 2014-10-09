@@ -21,20 +21,20 @@
       <th class="postmortem">Postmortem</th>
     </tr>
 
-    <tr class="bug-row" ng-repeat="sprint in sprints | orderBy:'name':true">
-      <td>
+    <tr class="bug-row" ng-class="{current: sprint.current}" ng-repeat="sprint in sprints | orderBy:'start_date':true">
+      <td class="name">
         <a ng-href="{{sprint.url}}">{{sprint.name}}</a>
       </td>
-      <td>
+      <td class="start">
         {{sprint.start_date|date:"M-d-yyyy"}}
       </td>
-      <td>
+      <td class="end">
         {{sprint.end_date|date:"M-d-yyyy"}}
       </td>
-      <td>
+      <td class="notes">
         {{sprint.notes}}
       </td>
-      <td>
+      <td class="postmortem">
         {{sprint.postmortem}}
       </td>
     </tr>

@@ -18,10 +18,19 @@ ernest.factory('Api', ['$resource', 'localStorageService',
         }
 
         function augmentSprint(project, sprint, bugs) {
-            var i, buglist_all = [], buglist_open = [];
+            var i,
+                buglist_all = [],
+                buglist_open = [],
+                today = new Date();
 
             sprint.project = project;
             sprint.url = '/project/' + project.slug + '/' + sprint.slug;
+
+            if (today >= new Date(sprint.start_date) && today <= new Date(sprint.end_date)) {
+                sprint.current = true;
+            } else {
+                sprint.current = false;
+            }
 
             // bugzilla buglist urls
             if (bugs) {

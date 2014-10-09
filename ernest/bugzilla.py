@@ -28,11 +28,9 @@ def show_me_the_logs():
 # show_me_the_logs()
 
 
-WHITEBOARD_SPRINT_RE = re.compile(
-    r'u=(?P<user>[^\s]*) '
-    r'c=(?P<component>[^\s]*) '
-    r'p=(?P<points>[^\s]*) '
-    r's=(?P<sprint>[^\s]*)')
+WHITEBOARD_KEYVALS_RE = re.compile(
+    r'\b(?P<key>\w)=(?P<val>[^\s]*)'
+)
 WHITEBOARD_FLAGS_RE = re.compile(r'\[(?P<flag>[^\]]+)\]')
 
 
@@ -49,18 +47,18 @@ class BugzillaTracker(object):
         if not whiteboard:
             return {}
 
-        wb_data = {}
+        wb_data = {
+            'u': '',
+            'c': '',
+            's': ''
+        }
 
-        wb_sprint_match = WHITEBOARD_SPRINT_RE.search(whiteboard)
-        if wb_sprint_match:
-            wb_data['u'] = wb_sprint_match.group('user')
-            wb_data['c'] = wb_sprint_match.group('component')
-            # Points are either an integer or an empty string
-            try:
-                wb_data['p'] = int(wb_sprint_match.group('points'))
-            except ValueError:
-                pass
-            wb_data['s'] = wb_sprint_match.group('sprint')
+        keyvals = WHITEBOARD_KEYVALS_RE.findall(whiteboard)
+        for key, val in keyvals:
+            if val:
+                if key == 'p':
+                    val = int(val)
+                wb_data[key] = val
 
         wb_data['flags'] = WHITEBOARD_FLAGS_RE.findall(whiteboard)
 

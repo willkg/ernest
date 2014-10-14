@@ -92,11 +92,11 @@ ernest.factory('Api', ['$resource', 'localStorageService',
                     var startBound = getBound(pointsToHours[bug.points].start);
                     var endBound = getBound(pointsToHours[bug.points].end);
 
-                    if (startBound > endDate) {
-                        bug.jeopardy = 'error';
-                    }
                     if (endBound > endDate) {
                         bug.jeopardy = 'warning';
+                    }
+                    if (startBound > endDate) {
+                        bug.jeopardy = 'error';
                     }
                 }
             }

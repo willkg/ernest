@@ -97,9 +97,14 @@ class Project(db.Model):
     name = db.Column(db.String(20), unique=True)
     slug = db.Column(db.String(20), unique=True)
 
+    github_owner = db.Column(db.String(20))
+    github_repo = db.Column(db.String(20))
+
     def __init__(self, name):
         self.name = name
         self.slug = slugify(name)
+        self.github_owner = ''
+        self.github_repo = ''
 
     def __repr__(self):
         return '<Project {0}>'.format(self.name)
@@ -109,6 +114,8 @@ class Project(db.Model):
             'id': self.id,
             'name': self.name,
             'slug': self.slug,
+            'github_owner': self.github_owner,
+            'github_repo': self.github_repo
         }
 
 
@@ -275,12 +282,25 @@ class ProjectDetailsView(MethodView):
             abort(403)
 
         json_data = request.get_json(force=True)
-        name = json_data['name']
-        new_sprint = Sprint(project_id=proj.id, name=name)
-        db.session.add(new_sprint)
+
+        if 'sprintname' in json_data:
+            # Create a new sprint
+            name = json_data['sprintname']
+            new_sprint = Sprint(project_id=proj.id, name=name)
+            db.session.add(new_sprint)
+            db.session.commit()
+            return jsonify({
+                'new_sprint': new_sprint
+            })
+
+        # Update project details
+        proj.name = json_data['name']
+        proj.github_owner = json_data['github_owner']
+        proj.github_repo = json_data['github_repo']
+        db.session.add(proj)
         db.session.commit()
         return jsonify({
-            'new_sprint': new_sprint
+            'project': proj
         })
 
 

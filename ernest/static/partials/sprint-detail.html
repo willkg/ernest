@@ -139,6 +139,7 @@
         <span class="muted">{{bug.component}}</span>
         {{bug.summary}}
         <span class="label" ng-repeat="flag in bug.whiteboardflags">{{flag}}</span>
+
       </td>
       <td class="assigned">
         <span ng-if="bug.gravatar_url">
@@ -152,7 +153,10 @@
         {{bug.last_change_time|date:"MM-dd-yyyy"}}
       </td>
       <td class="status">
-        {{bug.status}}
+        <a ng-repeat="pull in bug.pulls" ng-href="{{pull.url}}">PR-{{pull.number}}</a>
+        <span ng-hide="bug.pulls">
+          {{bug.status}}
+        </span>
       </td>
       <td class="points">
         <span ng-show="isEstimated(bug.points)">{{bug.points}}</span>

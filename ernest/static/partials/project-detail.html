@@ -100,4 +100,20 @@
     </tr>
   </table>
 
+  <div ng-show="is_admin">
+    <h2>(Admin-only) Project details:</h2>
+    <ng-form>
+      <label for="name">Project name:</label>
+      <input name="name" ng-model="project.name">
+
+      <label for="githubowner">Github owner:</label>
+      <input name="githubowner" ng-model="project.github_owner">
+
+      <label for="githubrepo">Github repo:</label>
+      <input name="githubrepo" ng-model="project.github_repo">
+
+      <button class="btn btn-primary" ng-click="updateProject()">Save</button>
+    </ng-form>
+  </div>
+
 </div>

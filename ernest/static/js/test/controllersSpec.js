@@ -79,7 +79,7 @@ describe('ernest controllers', function() {
             ctrl = $controller('ProjectDetailCtrl', {
                 $scope: scope,
                 $routeParams: {projSlug: 'support'},
-                Api: mockApi,
+                Api: mockApi
             });
         }));
 
@@ -90,10 +90,10 @@ describe('ernest controllers', function() {
         it('should fetch a project from the API', function() {
             assert(mockApi.get.calledWith({projSlug: 'support'}));
             mockApi.getDeferred.resolve({
-                project: 'A project',
+                project: {name: 'A project', github_owner: '', github_repo: ''},
                 sprints: ['some', 'sprints'],
             });
-            assert.equal(scope.project, 'A project');
+            assert.equal(scope.project, {name: 'A project', github_owner: '', github_repo: ''});
             assert.deepEqual(scope.sprints, ['some', 'sprints']);
         });
 
@@ -118,13 +118,13 @@ describe('ernest controllers', function() {
             prev_sprint: 'another sprint',
             total_bugs: 2,
             closed_bugs: 1,
-            priority_breakdown: 'a breakdown',
+            priority_breakdown: 'a breakdown'
         };
 
         beforeEach(inject(function($rootScope, $controller, $q) {
             mockApi = {
                 get: sinon.stub(),
-                getDeferred: new MockRequestPromise(),
+                getDeferred: new MockRequestPromise()
             };
             mockApi.get.returns(mockApi.getDeferred);
 
@@ -133,7 +133,7 @@ describe('ernest controllers', function() {
             ctrl = $controller('SprintDetailCtrl', {
                 $scope: scope,
                 $routeParams: {projSlug: 'support', sprintSlug: 'sprint1'},
-                Api: mockApi,
+                Api: mockApi
             });
         }));
 
@@ -281,7 +281,7 @@ describe('ernest controllers', function() {
 
             ctrl = $controller('LoadingCtrl', {
                 $rootScope: scope,
-                $scope: scope,
+                $scope: scope
             });
         }));
 

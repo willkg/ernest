@@ -12,7 +12,7 @@ ernest.controller('ProjectListCtrl', ['$scope', 'Api',
         $scope.$emit('loading+');
         $scope.projects = [];
 
-        Api.query().$promise.then(function(data) {
+        Api.get().$promise.then(function(data) {
             $scope.projects = data.projects;
 
             $scope.$emit('loading-');
@@ -20,8 +20,8 @@ ernest.controller('ProjectListCtrl', ['$scope', 'Api',
     }
 ]);
 
-ernest.controller('ProjectDetailCtrl', ['$scope', '$routeParams', '$cacheFactory', 'Api',
-    function($scope, $routeParams, $cacheFactory, Api) {
+ernest.controller('ProjectDetailCtrl', ['$scope', '$routeParams', '$http', '$cacheFactory', 'Api',
+    function($scope, $routeParams, $http, $cacheFactory, Api) {
         $scope.bugSortBy = {key: 'target_milestone', reverse: true};
         $scope.bugSort = function(bug) {
             var val = bug[$scope.bugSortBy.key];
@@ -49,16 +49,15 @@ ernest.controller('ProjectDetailCtrl', ['$scope', '$routeParams', '$cacheFactory
 
         function getData() {
             $scope.$emit('loading+');
-
-            var p = Api.get($routeParams).$promise.then(
-                function(data) {
+            var p = Api.get($routeParams).$promise
+                .then(function(data) {
                     $scope.project = data.project;
                     $scope.sprints = data.sprints;
                     $scope.is_admin = data.is_admin;
                     $scope.trackers = data.trackers;
                     $scope.$emit('loading-');
-                },
-                function(error) {
+                })
+                .catch(function(error) {
                     console.log('ERNEST ERROR: ' + error);
                     $scope.$emit('loading-');
                 });
@@ -76,12 +75,31 @@ ernest.controller('ProjectDetailCtrl', ['$scope', '$routeParams', '$cacheFactory
         $scope.$on('logout', function() { $scope.refresh(); });
 
         getData();
+
+        $scope.updateProject = function() {
+            var params = {
+                name: $scope.project.name,
+                github_owner: $scope.project.github_owner,
+                github_repo: $scope.project.github_repo
+            };
+
+            var url = '/api/project/' + $routeParams.projSlug;
+            $scope.$emit('loading+');
+            $http.post(url, params)
+                .success(function(err) {
+                    $scope.$emit('loading-');
+                })
+                .error(function(err) {
+                    console.log(err);
+                    $scope.$emit('loading-');
+                });
+        };
     }
 ]);
 
 ernest.controller('SprintNewCtrl', ['$scope', '$routeParams', '$http',
     function($scope, $routeParams, $http) {
-        $scope.newSprint = {name: ''};
+        $scope.newSprint = {sprintname: ''};
 
         $scope.createSprint = function() {
             var url = '/api/project/' + $routeParams.projSlug;
@@ -100,8 +118,9 @@ ernest.controller('SprintNewCtrl', ['$scope', '$routeParams', '$http',
     }
 ]);
 
-ernest.controller('SprintDetailCtrl', ['$scope', '$routeParams', '$http', '$cacheFactory', 'Api', 'localStorageService',
-    function($scope, $routeParams, $http, $cacheFactory, Api, localStorageService) {
+ernest.controller('SprintDetailCtrl', ['$scope', '$routeParams', '$http', '$q', '$cacheFactory',
+                                       'Api', 'GitHubRepoApi', 'localStorageService',
+    function($scope, $routeParams, $http, $q, $cacheFactory, Api, GitHubRepoApi, localStorageService) {
         $scope.showClosed = true;
         $scope.showNonStarred = true;
 
@@ -145,7 +164,7 @@ ernest.controller('SprintDetailCtrl', ['$scope', '$routeParams', '$http', '$cach
         };
 
         $scope.bugFilter = function(bug) {
-            if (!$scope.showClosed && $scope.isClosed(bug.status)) {
+            if (!$scope.showClosed && $scope.isClosed(bug)) {
                 return false;
             }
             if (!$scope.showNonStarred && bug.star === '0') {
@@ -245,23 +264,15 @@ ernest.controller('SprintDetailCtrl', ['$scope', '$routeParams', '$http', '$cach
         function getData() {
             $scope.$emit('loading+');
 
-            var p = Api.get($routeParams).$promise.then(
-                function(data) {
-                    $scope.$emit('loading-');
-
+            var prom = Api.get($routeParams).$promise
+                .then(function (data) {
                     $scope.project = data.project;
                     $scope.is_admin = data.is_admin;
-
-                    $scope.allBugs = data.bugs;
-                    $scope.openBugs = data.bugs.filter(function(bug) {
-                        return (bug.status !== 'VERIFIED' && bug.status !== 'RESOLVED');
-                    });
+                    $scope.bugs = data.bugs;
 
                     if ($scope.showClosed) {
-                        $scope.bugs = $scope.allBugs;
                         $scope.show_hide_closed = 'Hide closed';
                     } else {
-                        $scope.bugs = $scope.openBugs;
                         $scope.show_hide_closed = 'Show closed';
                     }
 
@@ -277,7 +288,6 @@ ernest.controller('SprintDetailCtrl', ['$scope', '$routeParams', '$http', '$cach
                     $scope.priority_breakdown = data.priority_breakdown;
                     $scope.points_breakdown = data.points_breakdown;
                     $scope.component_breakdown = data.component_breakdown;
-                    $scope.last_load = new Date();
 
                     if ($scope.bugs_with_no_points > 0) {
                         $scope.completionState = 'notready';
@@ -288,9 +298,43 @@ ernest.controller('SprintDetailCtrl', ['$scope', '$routeParams', '$http', '$cach
                     } else {
                         $scope.completionState = 'incomplete';
                     }
-                },
-                function(error) {
-                    // FIXME - should show an error here
+
+                    var newPromise = null;
+
+                    if (data.project.github_owner && data.project.github_repo) {
+                        // If we have GitHub data, then execute an
+                        // API request to get the list of pull
+                        // requests.
+                        var params = {owner: data.project.github_owner, repo: data.project.github_repo};
+                        var githubP = GitHubRepoApi.get(params).$promise;
+                        newPromise = githubP;
+                    } else {
+                        newPromise = $q.when([]);
+                    }
+
+                    return newPromise;
+                })
+                .then(function (ghData) {
+                    // Handle the GitHubRepoApi promise
+                    if (ghData !== undefined && ghData.length > 0) {
+                        var bugToPR = {};
+                        ghData.forEach(function (item) {
+                            item.bugNum.forEach(function (num) {
+                                var tmp = bugToPR[num] || [];
+                                tmp.push(item);
+                                bugToPR[num] = tmp;
+                            });
+                        });
+
+                        $scope.bugs.forEach(function (bug) {
+                            bug.pulls = bugToPR[bug.id] || [];
+                        });
+                    }
+
+                    $scope.$emit('loading-');
+                    $scope.last_load = new Date();
+                })
+                .catch(function(error) {
                     console.log('ERNEST ERROR: ' + error);
                     $scope.$emit('loading-');
                     $scope.last_load = new Date();
@@ -308,7 +352,7 @@ ernest.controller('SprintDetailCtrl', ['$scope', '$routeParams', '$http', '$cach
                 $scope.show_hide_non_starred = 'Show non-starred';
             }
 
-            return p;
+            return prom;
         }
 
         getData();

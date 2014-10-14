@@ -5,8 +5,42 @@ var ernest = angular.module('ernest');
 // To do: this should pull from the server.
 ernest.value('version', '0.1a1');
 
-ernest.factory('Api', ['$resource', 'localStorageService',
-    function($resource, localStorageService) {
+ernest.factory('GitHubRepoApi', ['$resource',
+    function($resource) {
+        function augmentPR(pr) {
+            var bugNums = (pr.title || '').match(/\bbug \d+\b/gi) || [];
+            bugNums = bugNums.map(function (num) {
+                return num.replace('bug ', '');
+            });
+
+            return {
+                'number': pr.number,
+                'title': pr.title,
+                'url': pr.html_url,
+                'bugNum': bugNums
+            };
+        }
+
+        function augment(data, headersGetter) {
+            data = data.map(augmentPR);
+            return data;
+        }
+
+        return $resource(
+            'https://api.github.com/repos/:owner/:repo/pulls', {}, {
+                get: {
+                    method: 'GET',
+                    transformResponse: [augment],
+                    isArray: true,
+                    cache: false,
+                    responseType: 'json'
+                }
+            });
+    }
+]);
+
+ernest.factory('Api', ['$resource', 'localStorageService', 'GitHubRepoApi',
+    function($resource, localStorageService, GitHubRepoApi) {
 
         function bugUrl() {
             return 'https://bugzilla.mozilla.org/show_bug.cgi?id=' + this.id;
@@ -52,7 +86,7 @@ ernest.factory('Api', ['$resource', 'localStorageService',
             return sprint;
         }
 
-        function augmentBug(bug, sprint) {
+        function augmentBug(sprint, bug) {
             var baseUrl = 'https://bugzilla.mozilla.org/show_bug.cgi?id=';
             bug.url = baseUrl + bug.id;
             if (bug.open_blockers) {
@@ -65,7 +99,7 @@ ernest.factory('Api', ['$resource', 'localStorageService',
             }
             bug.details_url = '/bugzilla/bug/' + bug.id;
 
-            if (bug.points !== null && sprint !== undefined && sprint.end_date !== null) {
+            if (bug.points !== null && sprint !== null && sprint.end_date !== null) {
                 // If the bug has points allocated and we know the
                 // sprint end_date, then we can calculate whether the
                 // bug is "in jeopardy".
@@ -114,7 +148,7 @@ ernest.factory('Api', ['$resource', 'localStorageService',
                 data.project = augmentProject(data.project);
             }
             if (data.trackers) {
-                data.trackers = data.trackers.map(augmentBug);
+                data.trackers = data.trackers.map(augmentBug.bind(null, null));
             }
             if (data.sprints) {
                 data.sprints = data.sprints.map(augmentSprint.bind(null, data.project));
@@ -129,19 +163,12 @@ ernest.factory('Api', ['$resource', 'localStorageService',
                 data.next_sprint = augmentSprint(data.project, data.next_sprint);
             }
             if (data.bugs) {
-                data.bugs = data.bugs.map(function (bug) { return augmentBug(bug, data.sprint); });
+                data.bugs = data.bugs.map(augmentBug.bind(null, data.sprint));
             }
             return data;
         }
 
         return $resource('/api/project/:projSlug/:sprintSlug/', {}, {
-            query: {
-                method: 'GET',
-                isArray: false,
-                transformResponse: [augment],
-                cache: true,
-                responseType: 'json'
-            },
             get: {
                 method: 'GET',
                 isArray: false,

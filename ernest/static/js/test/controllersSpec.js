@@ -9,6 +9,11 @@ function MockRequestPromise() {
 }
 MockRequestPromise.prototype.then = function(cb) {
     this.callbacks.push(cb);
+    return this;
+};
+MockRequestPromise.prototype.catch = function(cb) {
+    // FIXME: Right now we're ignoring errors
+    return this;
 };
 MockRequestPromise.prototype.thenAfterResolve = function(cb) {
     cb(this.resolvedWith);
@@ -31,10 +36,10 @@ describe('ernest controllers', function() {
 
         beforeEach(inject(function($rootScope, $controller, $q) {
             mockApi = {
-                query: sinon.stub(),
-                queryDeferred: new MockRequestPromise()
+                get: sinon.stub(),
+                getDeferred: new MockRequestPromise()
             };
-            mockApi.query.returns(mockApi.queryDeferred);
+            mockApi.get.returns(mockApi.getDeferred);
 
             scope = $rootScope.$new();
             emitSpy = sinon.spy(scope, '$emit');
@@ -50,7 +55,7 @@ describe('ernest controllers', function() {
 
 
         it('should fetch projects from the API.', function() {
-            mockApi.queryDeferred.resolve({
+            mockApi.getDeferred.resolve({
                 projects: ['some', 'projects'],
             });
             assert.deepEqual(scope.projects, ['some', 'projects']);
@@ -58,7 +63,7 @@ describe('ernest controllers', function() {
 
         it('should emit loading events', function() {
             assert(emitSpy.calledWith('loading+'));
-            mockApi.queryDeferred.resolve({projects: []});
+            mockApi.getDeferred.resolve({projects: []});
             assert(emitSpy.calledWith('loading-'));
         });
 
@@ -79,7 +84,7 @@ describe('ernest controllers', function() {
             ctrl = $controller('ProjectDetailCtrl', {
                 $scope: scope,
                 $routeParams: {projSlug: 'support'},
-                Api: mockApi,
+                Api: mockApi
             });
         }));
 
@@ -90,10 +95,11 @@ describe('ernest controllers', function() {
         it('should fetch a project from the API', function() {
             assert(mockApi.get.calledWith({projSlug: 'support'}));
             mockApi.getDeferred.resolve({
-                project: 'A project',
+                project: {name: 'A project', github_owner: '', github_repo: ''},
                 sprints: ['some', 'sprints'],
             });
-            assert.equal(scope.project, 'A project');
+            console.log(scope.project);
+            assert.deepEqual(scope.project, {name: 'A project', github_owner: '', github_repo: ''});
             assert.deepEqual(scope.sprints, ['some', 'sprints']);
         });
 
@@ -111,6 +117,11 @@ describe('ernest controllers', function() {
             bugs: [],
             bugs_with_no_points: 0,
             latest_change_time: new Date(),
+            project: {
+                name: 'SUMO',
+                github_owner: '',
+                github_repo: ''
+            },
             sprint: {},
             total_points: 4,
             closed_points: 2,
@@ -124,7 +135,7 @@ describe('ernest controllers', function() {
         beforeEach(inject(function($rootScope, $controller, $q) {
             mockApi = {
                 get: sinon.stub(),
-                getDeferred: new MockRequestPromise(),
+                getDeferred: new MockRequestPromise()
             };
             mockApi.get.returns(mockApi.getDeferred);
 
@@ -133,7 +144,7 @@ describe('ernest controllers', function() {
             ctrl = $controller('SprintDetailCtrl', {
                 $scope: scope,
                 $routeParams: {projSlug: 'support', sprintSlug: 'sprint1'},
-                Api: mockApi,
+                Api: mockApi
             });
         }));
 
@@ -281,7 +292,7 @@ describe('ernest controllers', function() {
 
             ctrl = $controller('LoadingCtrl', {
                 $rootScope: scope,
-                $scope: scope,
+                $scope: scope
             });
         }));
 

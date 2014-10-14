@@ -88,14 +88,16 @@ ernest.factory('Api', ['$resource', 'localStorageService',
                     return now;
                 };
 
-                var startBound = getBound(pointsToHours[bug.points].start);
-                var endBound = getBound(pointsToHours[bug.points].end);
+                if (pointsToHours[bug.points] !== undefined) {
+                    var startBound = getBound(pointsToHours[bug.points].start);
+                    var endBound = getBound(pointsToHours[bug.points].end);
 
-                if (startBound > endDate) {
-                    bug.jeopardy = 'error';
-                }
-                if (endBound > endDate) {
-                    bug.jeopardy = 'warning';
+                    if (startBound > endDate) {
+                        bug.jeopardy = 'error';
+                    }
+                    if (endBound > endDate) {
+                        bug.jeopardy = 'warning';
+                    }
                 }
             }
 

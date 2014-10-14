@@ -122,19 +122,19 @@ ernest.controller('SprintDetailCtrl', ['$scope', '$routeParams', '$http', '$cach
             return val;
         };
 
-        $scope.isClosed = function(val) {
+        $scope.isClosed = function(bug) {
             // Bugs are "closed" if they're either resolved or
             // verified.
-            return (val.toLowerCase() === 'resolved'
-                    || val.toLowerCase() === 'verified');
+            return (bug.status.toLowerCase() === 'resolved'
+                    || bug.status.toLowerCase() === 'verified');
         };
 
-        $scope.isJeopardyWarning = function(val) {
-            return val === 'warning';
+        $scope.isJeopardyWarning = function(bug) {
+            return !$scope.isClosed(bug) && bug.jeopardy === 'warning';
         };
 
-        $scope.isJeopardyError = function(val) {
-            return val === 'error';
+        $scope.isJeopardyError = function(bug) {
+            return !$scope.isClosed(bug) && bug.jeopardy === 'error';
         };
 
         $scope.isEstimated = function(val) {

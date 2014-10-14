@@ -41,6 +41,18 @@ th {
     background-color: #dff0d8;
 }
 
+#bug-table tr.jeopardywarning > td {
+    background-color: #fef5ca;
+}
+
+#bug-table tr.jeopardyerror {
+    border: 2px solid red;
+}
+
+#bug-table tr.jeopardyerror > td {
+    background-color: #f0dfd8;
+}
+
 #bug-table tr.current > td {
     background-color: #dfdfff;
 }

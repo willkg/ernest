@@ -112,7 +112,7 @@
       </th>
     </tr>
 
-    <tr class="bug-row" ng-class="{mine: bug.mine, closed: isClosed(bug.status)}" ng-repeat="bug in bugs | filter:bugFilter | orderBy:bugSort:bugSortBy.reverse">
+    <tr class="bug-row" ng-class="{mine: bug.mine, closed: isClosed(bug.status), jeopardywarning: isJeopardyWarning(bug.jeopardy), jeopardyerror: isJeopardyError(bug.jeopardy)}" ng-repeat="bug in bugs | filter:bugFilter | orderBy:bugSort:bugSortBy.reverse">
       <td class="star">
         <input type="checkbox" ng-model="bug.star" name="star{{bug.id}}" ng-true-value="1" ng-false-value="0"  ng-change="changeStar()">
       </td>

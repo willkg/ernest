@@ -129,6 +129,14 @@ ernest.controller('SprintDetailCtrl', ['$scope', '$routeParams', '$http', '$cach
                     || val.toLowerCase() === 'verified');
         };
 
+        $scope.isJeopardyWarning = function(val) {
+            return val === 'warning';
+        };
+
+        $scope.isJeopardyError = function(val) {
+            return val === 'error';
+        };
+
         $scope.isEstimated = function(val) {
             // Points field can be a number or null. Numbers indicate
             // it was estimated and null indicates it hasn't been

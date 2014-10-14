@@ -52,7 +52,7 @@ ernest.factory('Api', ['$resource', 'localStorageService',
             return sprint;
         }
 
-        function augmentBug(bug) {
+        function augmentBug(bug, sprint) {
             var baseUrl = 'https://bugzilla.mozilla.org/show_bug.cgi?id=';
             bug.url = baseUrl + bug.id;
             if (bug.open_blockers) {
@@ -64,6 +64,40 @@ ernest.factory('Api', ['$resource', 'localStorageService',
                 });
             }
             bug.details_url = '/bugzilla/bug/' + bug.id;
+
+            if (bug.points !== null && sprint !== undefined && sprint.end_date !== null) {
+                // If the bug has points allocated and we know the
+                // sprint end_date, then we can calculate whether the
+                // bug is "in jeopardy".
+
+                // FIXME - This is hard-coded for now. It should be part of
+                // the sprint data.
+                var pointsToHours = {
+                    0: {start: 1, end: 1},
+                    1: {start: 12, end: 12},
+                    2: {start: 24, end: 48},
+                    3: {start: 72, end: 120}
+                };
+
+                var endDate = new Date(sprint.end_date);
+                endDate.setUTCHours(23, 59, 59, 999);
+
+                var getBound = function (hours) {
+                    var now = new Date();
+                    now.setUTCHours(now.getUTCHours() + hours);
+                    return now;
+                };
+
+                var startBound = getBound(pointsToHours[bug.points].start);
+                var endBound = getBound(pointsToHours[bug.points].end);
+
+                if (startBound > endDate) {
+                    bug.jeopardy = 'error';
+                }
+                if (endBound > endDate) {
+                    bug.jeopardy = 'warning';
+                }
+            }
 
             bug.star = localStorageService.get('star' + bug.id) || '0';
 
@@ -93,7 +127,7 @@ ernest.factory('Api', ['$resource', 'localStorageService',
                 data.next_sprint = augmentSprint(data.project, data.next_sprint);
             }
             if (data.bugs) {
-                data.bugs = data.bugs.map(augmentBug);
+                data.bugs = data.bugs.map(function (bug) { return augmentBug(bug, data.sprint); });
             }
             return data;
         }

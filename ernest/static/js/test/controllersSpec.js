@@ -98,7 +98,6 @@ describe('ernest controllers', function() {
                 project: {name: 'A project', github_owner: '', github_repo: ''},
                 sprints: ['some', 'sprints'],
             });
-            console.log(scope.project);
             assert.deepEqual(scope.project, {name: 'A project', github_owner: '', github_repo: ''});
             assert.deepEqual(scope.sprints, ['some', 'sprints']);
         });

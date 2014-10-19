@@ -211,8 +211,10 @@ class BugzillaTracker(object):
                 params['product'] = p
 
         if sprint:
-            params['whiteboard'] = 's=' + sprint
-            params['whiteboard_type'] = 'contains'
+            # Note: bugzilla "regexp" is really mysql regexp which is
+            # POSIX regexp and missing interesting things.
+            params['whiteboard'] = 's=' + sprint + '[[:>:]]'
+            params['whiteboard_type'] = 'regexp'
 
         if summary:
             params['summary'] = summary

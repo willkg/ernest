@@ -411,6 +411,7 @@ class ProjectSprintView(MethodView):
 
             # Pick out whiteboard data
             wb_data = bz.parse_whiteboard(bug['whiteboard'])
+            bug['sprint'] = wb_data.get('s', None)
             bug['points'] = wb_data.get('p', None)
             bug['component'] = wb_data.get('c', None)
 

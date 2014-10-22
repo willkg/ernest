@@ -231,7 +231,7 @@ class BugzillaTracker(object):
         url = self.bzurl + '/bug'
 
         if ids:
-            params['id'] = ','.join(ids)
+            params['id'] = ','.join(map(str, ids))
 
         r = requests.request(
             'GET',

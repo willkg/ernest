@@ -19,7 +19,7 @@ DEBUG = truthiness(os.environ.get('DEBUG', True))
 BUGZILLA_LOGIN_URL = 'https://bugzilla.mozilla.org/index.cgi'
 
 # Set the Bugzilla API url.
-BUGZILLA_API_URL = 'https://api-dev.bugzilla.mozilla.org/latest'
+BUGZILLA_API_URL = 'https://bugzilla.mozilla.org/bzapi/'
 
 # This will fail if there's no SECRET_KEY in the environment.
 # Either provide it there or add it to settings_local.py

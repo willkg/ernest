@@ -165,8 +165,8 @@ class Sprint(db.Model):
             'id': self.id,
             'name': self.name,
             'slug': self.slug,
-            'start_date': self.start_date.isoformat() if self.start_date else '',
-            'end_date': self.end_date.isoformat() if self.end_date else '',
+            'start_date': self.start_date.strftime('%Y-%m-%d') if self.start_date else '',
+            'end_date': self.end_date.strftime('%Y-%m-%d') if self.end_date else '',
             'notes': self.notes,
             'postmortem': self.postmortem,
         }

@@ -60,7 +60,9 @@ ernest.factory('Api', ['$resource', 'localStorageService', 'GitHubRepoApi',
             sprint.project = project;
             sprint.url = '/project/' + project.slug + '/' + sprint.slug;
 
-            if (today >= new Date(sprint.start_date) && today <= new Date(sprint.end_date)) {
+            if (sprint.start_date !== '' && sprint.end_date !== ''
+                    && today >= new Date(sprint.start_date)
+                    && today <= new Date(sprint.end_date)) {
                 sprint.current = true;
             } else {
                 sprint.current = false;

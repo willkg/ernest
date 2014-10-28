@@ -99,7 +99,7 @@ ernest.controller('ProjectDetailCtrl', ['$scope', '$routeParams', '$http', '$cac
 
 ernest.controller('SprintNewCtrl', ['$scope', '$routeParams', '$http',
     function($scope, $routeParams, $http) {
-        $scope.newSprint = {sprintname: ''};
+        $scope.newSprint = {sprintname: '', error: ''};
 
         $scope.createSprint = function() {
             var url = '/api/project/' + $routeParams.projSlug;
@@ -108,10 +108,12 @@ ernest.controller('SprintNewCtrl', ['$scope', '$routeParams', '$http',
                 .success(function(err) {
                     $scope.$emit('newSprint');
                     $scope.$emit('loading-');
-                    $scope.newSprint = {name: ''};
+                    $scope.newSprint.sprintname = '';
+                    $scope.newSprint.error = '';
                 })
                 .error(function(err) {
                     console.log(err);
+                    $scope.newSprint.error = err.error;
                     $scope.$emit('loading-');
                 });
         };

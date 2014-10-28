@@ -9,6 +9,7 @@ from flask.views import MethodView
 from flask.ext.sqlalchemy import SQLAlchemy
 
 from flask_sslify import SSLify
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import NoResultFound
 from werkzeug.routing import BaseConverter
 
@@ -286,9 +287,13 @@ class ProjectDetailsView(MethodView):
         if 'sprintname' in json_data:
             # Create a new sprint
             name = json_data['sprintname']
-            new_sprint = Sprint(project_id=proj.id, name=name)
-            db.session.add(new_sprint)
-            db.session.commit()
+            try:
+                new_sprint = Sprint(project_id=proj.id, name=name)
+                db.session.add(new_sprint)
+                db.session.commit()
+            except IntegrityError:
+                return jsonify({'error': 'Integrity error: sprint with that slug already exists'}), 400
+
             return jsonify({
                 'new_sprint': new_sprint
             })
@@ -315,9 +320,12 @@ class ProjectSprintView(MethodView):
         sprints = list((db.session.query(Sprint)
                         .filter_by(project_id=project.id)
                         .all()))
-        # FIXME - this sorts sprints on name to figure out prev/next sprints.
-        # The code is gross.
-        sprints.sort(key=lambda spr: spr.name)
+
+        # FIXME - this sorts sprints on (start_date, name) to figure
+        # out prev/next sprints. The code is gross.
+        sprints.sort(key=lambda spr: (
+            spr.start_date.strftime('%Y-%m-%d') if spr.start_date else '',
+            spr.name))
         next_sprint = None
         prev_sprint = None
         for i, spr in enumerate(sprints):

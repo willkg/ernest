@@ -76,7 +76,7 @@
     </div>
   </div>
 
-  <table id="bug-table" class="table-striped table-condensed">
+  <table id="bug-table" class="table-striped table-condensed" ng-show="bugs">
     <tr>
       <th class="star">
         Star
@@ -165,7 +165,7 @@
     </tr>
   </table>
 
-  <div class="row">
+  <div class="row" ng-show="bugs">
     <div class="span4">
       <h3>Priority breakdown:</h3>
       <table class="table-striped table-condensed">
@@ -194,7 +194,13 @@
       </table>
     </div>
   </div>
-  <p>Note: It'd be nice if these were pie charts.</p>
+  <div ng-show="bugs">
+    <p>Note: It'd be nice if these were pie charts.</p>
+  </div>
+
+  <div ng-show="nobugs">
+    <h4>There are no bugs in this sprint.</h4>
+  </div>
 
   <div id="sprintnotes">
     <div class="container">

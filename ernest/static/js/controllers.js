@@ -125,6 +125,7 @@ ernest.controller('SprintDetailCtrl', ['$scope', '$routeParams', '$http', '$q', 
     function($scope, $routeParams, $http, $q, $cacheFactory, Api, GitHubRepoApi, localStorageService) {
         $scope.showClosed = true;
         $scope.showNonStarred = true;
+        $scope.nobugs = false;
 
         $scope.bugSortBy = {key: 'priority', reverse: false};
         $scope.bugSort = function(bug) {
@@ -291,7 +292,7 @@ ernest.controller('SprintDetailCtrl', ['$scope', '$routeParams', '$http', '$q', 
                     $scope.points_breakdown = data.points_breakdown;
                     $scope.component_breakdown = data.component_breakdown;
 
-                    if ($scope.bugs_with_no_points > 0) {
+                    if ($scope.bugs_with_no_points > 0 || $scope.total_points === 0) {
                         $scope.completionState = 'notready';
                     } else if ($scope.closed_points === $scope.total_points) {
                         $scope.completionState = 'done';
@@ -299,6 +300,12 @@ ernest.controller('SprintDetailCtrl', ['$scope', '$routeParams', '$http', '$q', 
                         $scope.completionState = 'almost';
                     } else {
                         $scope.completionState = 'incomplete';
+                    }
+
+                    if ($scope.bugs.length === 0) {
+                        $scope.nobugs = true;
+                    } else {
+                        $scope.nobugs = false;
                     }
 
                     var newPromise = null;

@@ -440,9 +440,11 @@ class ProjectSprintView(MethodView):
 
             bug['whiteboardflags'] = wb_data['flags']
 
-        # FIXME - this fails if there's no bug data
-        latest_change_time = max(
-            [bug.get('last_change_time', 0) for bug in bug_data['bugs']])
+        if bug_data['bugs']:
+            latest_change_time = max(
+                [bug.get('last_change_time', 0) for bug in bug_data['bugs']])
+        else:
+            latest_change_time = None
 
         # FIXME - this is a stopgap until we have sorting in the
         # table. It tries hard to sort P1 through P5 and then bugs

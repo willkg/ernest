@@ -143,6 +143,11 @@ ernest.factory('Api', ['$resource', 'localStorageService', 'GitHubRepoApi',
         }
 
         function augment(data, headersGetter) {
+            // If there's no data, just return
+            if (data === null) {
+                return data;
+            }
+
             if (data.projects) {
                 data.projects = data.projects.map(augmentProject);
             }

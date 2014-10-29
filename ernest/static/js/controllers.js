@@ -103,6 +103,11 @@ ernest.controller('SprintNewCtrl', ['$scope', '$routeParams', '$http',
 
         $scope.createSprint = function() {
             var url = '/api/project/' + $routeParams.projSlug;
+            if ($scope.newSprint.sprintname === '') {
+                $scope.newSprint.error = 'Sprint must have a name.';
+                return;
+            }
+
             $scope.$emit('loading+');
             $http.post(url, $scope.newSprint)
                 .success(function(err) {

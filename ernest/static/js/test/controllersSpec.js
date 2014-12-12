@@ -95,10 +95,10 @@ describe('ernest controllers', function() {
         it('should fetch a project from the API', function() {
             assert(mockApi.get.calledWith({projSlug: 'support'}));
             mockApi.getDeferred.resolve({
-                project: {name: 'A project', github_owner: '', github_repo: ''},
+                project: {name: 'A project', bugzilla_product: '', github_owner: '', github_repo: ''},
                 sprints: ['some', 'sprints'],
             });
-            assert.deepEqual(scope.project, {name: 'A project', github_owner: '', github_repo: ''});
+            assert.deepEqual(scope.project, {name: 'A project', bugzilla_product: '', github_owner: '', github_repo: ''});
             assert.deepEqual(scope.sprints, ['some', 'sprints']);
         });
 
@@ -118,6 +118,7 @@ describe('ernest controllers', function() {
             latest_change_time: new Date(),
             project: {
                 name: 'SUMO',
+                bugzilla_product: 'support.mozilla.org',
                 github_owner: '',
                 github_repo: ''
             },

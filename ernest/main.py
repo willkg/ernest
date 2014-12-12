@@ -98,12 +98,14 @@ class Project(db.Model):
     name = db.Column(db.String(20), unique=True)
     slug = db.Column(db.String(20), unique=True)
 
+    bugzilla_product = db.Column(db.String(50))
     github_owner = db.Column(db.String(20))
     github_repo = db.Column(db.String(20))
 
     def __init__(self, name):
         self.name = name
         self.slug = slugify(name)
+        self.bugzilla_product = ''
         self.github_owner = ''
         self.github_repo = ''
 
@@ -115,6 +117,7 @@ class Project(db.Model):
             'id': self.id,
             'name': self.name,
             'slug': self.slug,
+            'bugzilla_product': self.bugzilla_product,
             'github_owner': self.github_owner,
             'github_repo': self.github_repo
         }
@@ -232,7 +235,7 @@ class ProjectDetailsView(MethodView):
         bugzilla_cookie = session.get('Bugzilla_logincookie')
 
         components = [
-            {'product': project.name, 'component': '__ANY__'}
+            {'product': project.bugzilla_product, 'component': '__ANY__'}
         ]
 
         bz = BugzillaTracker(app)
@@ -300,6 +303,7 @@ class ProjectDetailsView(MethodView):
 
         # Update project details
         proj.name = json_data['name']
+        proj.bugzilla_product = json_data['bugzilla_product']
         proj.github_owner = json_data['github_owner']
         proj.github_repo = json_data['github_repo']
         db.session.add(proj)
@@ -342,7 +346,7 @@ class ProjectSprintView(MethodView):
         changed_after = request.args.get('since')
 
         components = [
-            {'product': project.name, 'component': '__ANY__'}
+            {'product': project.bugzilla_product, 'component': '__ANY__'}
         ]
 
         bz = BugzillaTracker(app)

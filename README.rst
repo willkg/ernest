@@ -93,7 +93,8 @@ To update your db by applying all unapplied migrations, do::
 
     $ alembic upgrade head
 
-To create a new migration, do::
+To create a new migration make the model changes you need
+to make and then, do::
 
     $ alembic revision -m "some message" --autogenerate
 

@@ -79,6 +79,7 @@ ernest.controller('ProjectDetailCtrl', ['$scope', '$routeParams', '$http', '$cac
         $scope.updateProject = function() {
             var params = {
                 name: $scope.project.name,
+                bugzilla_product: $scope.project.bugzilla_product,
                 github_owner: $scope.project.github_owner,
                 github_repo: $scope.project.github_repo
             };

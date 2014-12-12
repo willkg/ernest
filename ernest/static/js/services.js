@@ -10,7 +10,7 @@ ernest.factory('GitHubRepoApi', ['$resource',
         function augmentPR(pr) {
             var bugNums = (pr.title || '').match(/\bbug \d+\b/gi) || [];
             bugNums = bugNums.map(function (num) {
-                return num.replace('bug ', '');
+                return num.replace(/bug /i, '');
             });
 
             return {

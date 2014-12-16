@@ -431,9 +431,11 @@ class ProjectSprintView(MethodView):
                 bugs_with_no_points += 1
             else:
                 total_points += bug['points']
-                if bug['status'].lower() in ('resolved', 'verified'):
+
+            if bug['status'].lower() in ('resolved', 'verified'):
+                if bug['points'] is not None:
                     closed_points += bug['points']
-                    closed_bugs += 1
+                closed_bugs += 1
 
             priority_breakdown[bug['priority']] = (
                 priority_breakdown.get(bug['priority'], 0) + 1)

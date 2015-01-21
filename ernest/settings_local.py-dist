@@ -1,8 +1,14 @@
 # Set this to True for development and False for production.
 DEBUG = True
 
-# Set this to the uri for your database.
-# SQLALCHEMY_DATABASE_URI = ''
+# Set this to the uri for your database. Uncomment the following
+# to use sqlite.
+# SQLALCHEMY_DATABASE_URI = os.environ.get(
+#     'SQLALCHEMY_DATABASE_URI',
+#     'sqlite:///{0}/ernest_app.db'.format(
+#         os.path.join(os.path.dirname(__file__), '..')
+#     )
+# )
 
 # This is the secret key. It's important to set this to something
 # non-trivial and not shared. Set this in your settings_local.py

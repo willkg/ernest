@@ -126,9 +126,9 @@ ernest.controller('SprintNewCtrl', ['$scope', '$routeParams', '$http',
     }
 ]);
 
-ernest.controller('SprintDetailCtrl', ['$scope', '$routeParams', '$http', '$q', '$cacheFactory',
+ernest.controller('SprintDetailCtrl', ['$scope', '$routeParams', '$http', '$q', '$cacheFactory', '$interval',
                                        'Api', 'GitHubRepoApi', 'localStorageService',
-    function($scope, $routeParams, $http, $q, $cacheFactory, Api, GitHubRepoApi, localStorageService) {
+    function($scope, $routeParams, $http, $q, $cacheFactory, $interval, Api, GitHubRepoApi, localStorageService) {
         $scope.showClosed = true;
         $scope.showNonStarred = true;
         $scope.nobugs = false;
@@ -371,6 +371,15 @@ ernest.controller('SprintDetailCtrl', ['$scope', '$routeParams', '$http', '$q', 
         }
 
         getData();
+        // Refresh the data every 10 minutes. Since it does a GH API
+        // request, we probably don't want to do it more often than
+        // that.
+        var refreshInterval = $interval($scope.refresh, 10 * 60 * 1000);
+        $scope.$on('$destroy', function() {
+            if (angular.isDefined(refreshInterval)) {
+                $interval.cancel(refreshInterval);
+            }
+        });
     }
 ]);
 

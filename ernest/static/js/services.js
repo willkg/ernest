@@ -12,7 +12,7 @@ ernest.factory('GitHubRepoApi', ['$resource',
             // Not actually replacing. This is just the best way to iterate over every match of a regex.
             // This grabs bug stanzas (defined as a pair of brackets that start with "bug", and some
             // numbers and maybe commas and spaces). Then it breaks them up into their component numbers.
-            str.replace(/\[bug\s*\d+(?:,\s*\d+)*\]/gi, function(stanza) {
+            pr.title.replace(/\[bug\s*\d+(?:,\s*\d+)*\]/gi, function(stanza) {
                 // We have a bug stanza
                 bugNums = bugNums.concat(stanza.split(/[^\d]/).filter(function(bn) { return bn != ""; }));
             });

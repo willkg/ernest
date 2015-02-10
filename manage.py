@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 import subprocess
+import sys
 
 from flask.ext.script import Manager
+from prettytable import PrettyTable
 from sqlalchemy.exc import IntegrityError, OperationalError, ProgrammingError
 from sqlalchemy.orm.exc import NoResultFound
 
@@ -15,6 +17,16 @@ def call_command(cmd, verbose=False):
     if verbose:
         print cmd
     subprocess.call(cmd)
+
+
+def get_project(projectname, exit_on_error=False):
+    try:
+        return db.session.query(Project).filter_by(name=projectname).one()
+    except NoResultFound:
+        # FIXME: Change this to print to stderr
+        print 'Error: Project "{0}" does not exist.'.format(projectname)
+        if exit_on_error:
+            sys.exit(1)
 
 
 @manager.command
@@ -64,11 +76,7 @@ def create_project(projectname):
 @manager.command
 def create_admin(projectname, adminaccount):
     """Add an admin to a project"""
-    try:
-        proj = db.session.query(Project).filter_by(name=projectname).one()
-    except NoResultFound:
-        print 'Error: Project "{0}" does not exist.'.format(projectname)
-        return
+    proj = get_project(projectname, exit_on_error=True)
 
     try:
         new_admin = ProjectAdmin(project_id=proj.id, account=adminaccount)
@@ -85,11 +93,7 @@ def create_admin(projectname, adminaccount):
 @manager.command
 def create_sprint(projectname, sprintname):
     """Create a new sprint for a project"""
-    try:
-        proj = db.session.query(Project).filter_by(name=projectname).one()
-    except NoResultFound:
-        print 'Error: Project "{0}" does not exist.'.format(projectname)
-        return
+    proj = get_project(projectname, exit_on_error=True)
 
     try:
         new_sprint = Sprint(project_id=proj.id, name=sprintname)
@@ -101,6 +105,48 @@ def create_sprint(projectname, sprintname):
         return
 
     print 'Created sprint {0} for project {1}.'.format(sprintname, projectname)
+
+
+@manager.command
+def list_sprints(projectname):
+    """Lists all the sprints for a given project"""
+    proj = get_project(projectname, exit_on_error=True)
+
+    sprints = (db.session.query(Sprint)
+               .filter_by(project_id=proj.id)
+               .order_by(Sprint.name)
+               .all())
+
+    print 'Sprints for project {}'.format(proj.name)
+    print ''
+
+    if sprints:
+        table = PrettyTable(['name', 'slug', 'start', 'end'])
+        table.align['name'] = 'l'
+        table.align['slug'] = 'l'
+        table.align['start'] = 'l'
+        table.align['end'] = 'l'
+
+        for sprint in sprints:
+            table.add_row([sprint.name, sprint.slug, sprint.start_date, sprint.end_date])
+        print table
+    else:
+        print 'No sprints'
+
+
+@manager.command
+def delete_sprint(projectname, sprintname):
+    proj = get_project(projectname, exit_on_error=True)
+
+    try:
+        sprint = db.session.query(Sprint).filter_by(project_id=proj.id, name=sprintname).one()
+    except NoResultFound:
+        print 'Error Sprint "{0}" does not exist.'.format(sprintname)
+        return
+
+    db.session.delete(sprint)
+    db.session.commit()
+    print '{0} deleted.'.format(sprintname)
 
 
 if __name__ == '__main__':

@@ -133,6 +133,10 @@ ernest.controller('SprintDetailCtrl', ['$scope', '$routeParams', '$http', '$q', 
         $scope.showNonStarred = true;
         $scope.nobugs = false;
 
+        $scope.autoRefreshInterval = null;
+        $scope.enabledAutoRefresh = false;
+        $scope.enable_disable_auto_refresh = 'Enable autorefresh';
+
         $scope.bugSortBy = {key: 'priority', reverse: false};
         $scope.bugSort = function(bug) {
             var val = bug[$scope.bugSortBy.key];
@@ -237,6 +241,21 @@ ernest.controller('SprintDetailCtrl', ['$scope', '$routeParams', '$http', '$q', 
             } else {
                 $scope.showNonStarred = true;
                 $scope.show_hide_non_starred = 'Hide non-starred';
+            }
+        };
+
+        $scope.changeEnabledAutoRefresh = function() {
+            if ($scope.enabledAutoRefresh) {
+                $scope.enabledAutoRefresh = false;
+                if ($scope.autoRefreshInterval !== null) {
+                    $interval.cancel($scope.autoRefreshInterval);
+                    $scope.autoRefreshInterval = null;
+                }
+                $scope.enable_disable_auto_refresh = 'Enable autorefresh';
+            } else {
+                $scope.enabledAutoRefresh = true;
+                $scope.autoRefreshInterval = $interval($scope.refresh, 10 * 60 * 1000);
+                $scope.enable_disable_auto_refresh = 'Disable autorefresh';
             }
         };
 
@@ -367,6 +386,11 @@ ernest.controller('SprintDetailCtrl', ['$scope', '$routeParams', '$http', '$q', 
                 $scope.show_hide_non_starred = 'Show non-starred';
             }
 
+            if ($scope.enabledAutoRefresh) {
+                $scope.enable_disable_auto_refresh = 'Disable autorefresh';
+            } else {
+                $scope.enable_disable_auto_refresh = 'Enable autorefresh';
+            }
             return prom;
         }
 
@@ -374,10 +398,9 @@ ernest.controller('SprintDetailCtrl', ['$scope', '$routeParams', '$http', '$q', 
         // Refresh the data every 10 minutes. Since it does a GH API
         // request, we probably don't want to do it more often than
         // that.
-        var refreshInterval = $interval($scope.refresh, 10 * 60 * 1000);
         $scope.$on('$destroy', function() {
-            if (angular.isDefined(refreshInterval)) {
-                $interval.cancel(refreshInterval);
+            if ($scope.autoRefreshInterval !== null) {
+                $interval.cancel($scope.autoRefreshInterval);
             }
         });
     }

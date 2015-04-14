@@ -427,13 +427,13 @@ class ProjectSprintView(MethodView):
             bug['points'] = wb_data.get('p', None)
             bug['component'] = wb_data.get('c', None)
 
-            if bug['points'] is None:
+            if bug['points'] is None or bug['points'] == '?':
                 bugs_with_no_points += 1
             else:
                 total_points += bug['points']
 
             if bug['status'].lower() in ('resolved', 'verified'):
-                if bug['points'] is not None:
+                if bug['points'] is not None and bug['points'] != '?':
                     closed_points += bug['points']
                 closed_bugs += 1
 

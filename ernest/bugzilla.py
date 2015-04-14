@@ -57,7 +57,11 @@ class BugzillaTracker(object):
         for key, val in keyvals:
             if val:
                 if key == 'p':
-                    val = int(val)
+                    try:
+                        val = int(val)
+                    except ValueError:
+                        # FIXME: we're allowing p=? now and ? isn't an int
+                        pass
                 wb_data[key] = val
 
         wb_data['flags'] = WHITEBOARD_FLAGS_RE.findall(whiteboard)

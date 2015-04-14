@@ -24,6 +24,9 @@ class BugzillaTestCase(TestCase):
             ('p=1 u=contributor c=questions s=2014.5', {
                 'u': 'contributor', 'c': 'questions', 'p': 1, 's': '2014.5',
                 'flags': []}),
+            ('u=user c=comp p=? s=2013.20 [foo]', {
+                'u': 'user', 'c': 'comp', 'p': '?', 's': '2013.20',
+                'flags': ['foo']}),
         )
 
         for text, expected in tests:

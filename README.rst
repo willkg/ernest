@@ -1,3 +1,19 @@
+**End-of-lifed October 2nd, 2015**
+
+This project is no longer being maintained. It is end-of-lifed. I
+will be doing no more work on it.
+
+Why? Because so many things have changed in the last couple of years
+that it makes sense to ditch this and start over. Bugzilla API and auth
+have changed. There's no good reason to pass Bugzilla requests through
+the server--the client should do them directly. I stopped using Flask
+and Angular for projects. Etc.
+
+I used Ernest for 2 years, though. Got a lot of mileage out of it.
+
+/will
+
+
 ======
 README
 ======
